@@ -2,6 +2,7 @@ import argparse
 import os
 import shutil
 import time
+import errno
 
 import torch
 import torch.nn as nn
@@ -15,7 +16,11 @@ import torchvision.datasets as datasets
 from autoaugment import CIFAR10Policy
 from torch.autograd import Variable
 
-import networks
+import networks.resnet
+import networks.wideresnet
+import networks.se_resnet
+import networks.se_wideresnet
+import networks.densenet_bc
 import numpy as np
 
 # from wideresnet import WideResNet
@@ -114,7 +119,7 @@ parser.add_argument('--resume', default='', type=str,
 
 parser.add_argument('--name', default='', type=str,
                     help='name of experiment')
-parser.add_argument('-no', default='1', type=str,
+parser.add_argument('--no', default='1', type=str,
                     help='index of the experiment (for recording convenience)')
 
 parser.add_argument('--combine-ratio', default=0.5, type=float,
@@ -155,17 +160,28 @@ parser.add_argument('--tensorboard',
 args = parser.parse_args()
 
 
-record_path = './ISDA test/' + str(args.dataset) + '_' + str(args.model) + '_' + str(args.name) + \
-              '/' + 'no_' + str(args.no) + '_combine-ratio_' + str(args.combine_ratio) \
-              + '_standard-Aug_' if args.augment else ''\
-              + '_autoaugment_' if args.autoaugment else ''\
-              + '_erasing_' if args.erasing else ''\
-              + '_cutout_' if args.cutout else ''\
-              + '_cos-lr_' if args.cos_lr else ''\
-              + '/'
-record_file = record_path + 'training_process.txt'
-accuracy_file = record_path + 'accuracy_epoch.txt'
-loss_file = record_path + 'loss_epoch.txt'
+record_path = './ISDA test/' + str(args.dataset) \
+              + '_' + str(args.model) \
+              + '-' + str(args.layers) \
+              + (('-' + str(args.widen_factor)) if 'wide' in args.model else '') \
+              + (('-' + str(args.growth_rate)) if 'dense' in args.model else '') \
+              + '_' + str(args.name) \
+              + '/' + 'no_' + str(args.no) \
+              + '_combine-ratio_' + str(args.combine_ratio) \
+              + ('_standard-Aug_' if args.augment else '') \
+              + ('_dropout_' if args.droprate > 0 else '') \
+              + ('_autoaugment_' if args.autoaugment else '') \
+              + ('_erasing_' if args.erasing else '') \
+              + ('_cutout_' if args.cutout else '') \
+              + ('_cos-lr_' if args.cos_lr else '')
+
+
+# print(record_path)
+# input()
+record_file = record_path + '/training_process.txt'
+accuracy_file = record_path + '/accuracy_epoch.txt'
+loss_file = record_path + '/loss_epoch.txt'
+check_point = os.path.join(record_path, args.checkpoint)
 
 
 class MarginalizedLoss(nn.Module):
@@ -181,7 +197,7 @@ class MarginalizedLoss(nn.Module):
 
 
 
-        ratio = args.combine_ratio * (epoch / (int(args.epochs)))
+        ratio = args.combine_ratio * (epoch / (training_configurations[args.model]['epochs']))
 
         N = features.size(0)
         C = class_num
@@ -289,18 +305,31 @@ class MarginalizedLoss(nn.Module):
 
 class Full_layer(torch.nn.Module):
 
-    def __init__(self, class_num):
+    def __init__(self, feature_num, class_num):
         super(Full_layer, self).__init__()
-        self.class_num = class_num
-        self.fc = nn.Linear(64 * args.widen_factor, class_num)
+        # self.class_num = class_num
+        self.fc = nn.Linear(feature_num, class_num)
 
     def forward(self, x):
         x = self.fc(x)
         return x
 
 
+def mkdir_p(path):
+    '''make dir if not exist'''
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
 def main():
+
     global best_prec1
+    best_prec1 = 0
+
     global val_acc
     val_acc = []
 
@@ -308,29 +337,6 @@ def main():
 
     class_num = args.dataset == 'cifar10' and 10 or 100
 
-    global feature_num
-
-    feature_num = int(64 * args.widen_factor)
-
-    isExists = os.path.exists(record_path)
-    if not isExists:
-        os.makedirs(record_path)
-
-    global sp
-    sp = nn.CrossEntropyLoss().cuda()
-
-    global CoVariance
-
-    CoVariance = torch.zeros(class_num, feature_num, feature_num).cuda()
-
-    global CoVariance_used
-    CoVariance_used = torch.zeros(class_num, feature_num, feature_num).cuda()
-
-    global Ave
-    Ave = torch.zeros(class_num, feature_num).cuda()
-
-    global Amount
-    Amount = torch.zeros(class_num).cuda()
 
     normalize = transforms.Normalize(mean=[x/255.0 for x in [125.3, 123.0, 113.9]],
                                      std=[x/255.0 for x in [63.0, 62.1, 66.7]])
@@ -367,16 +373,16 @@ def main():
     train_loader = torch.utils.data.DataLoader(
         datasets.__dict__[args.dataset.upper()]('../data', train=True, download=True,
                          transform=transform_train),
-        batch_size=args.batch_size, shuffle=True, **kwargs)
+        batch_size=training_configurations[args.model]['batch_size'], shuffle=True, **kwargs)
     val_loader = torch.utils.data.DataLoader(
         datasets.__dict__[args.dataset.upper()]('../data', train=False, transform=transform_test),
-        batch_size=args.batch_size, shuffle=True, **kwargs)
+        batch_size=training_configurations[args.model]['batch_size'], shuffle=True, **kwargs)
 
     # create model
     if args.model == 'resnet':
-        model = eval('networks.resnet.resnet' + args.layers + '_cifar')(dropout_rate=args.droprate)
+        model = eval('networks.resnet.resnet' + str(args.layers) + '_cifar')(dropout_rate=args.droprate)
     elif args.model == 'se_resnet':
-        model = eval('networks.se_resnet.resnet' + args.layers + '_cifar')(dropout_rate=args.droprate)
+        model = eval('networks.se_resnet.resnet' + str(args.layers) + '_cifar')(dropout_rate=args.droprate)
     elif args.model == 'wideresnet':
         model = networks.wideresnet.WideResNet(args.layers, args.dataset == 'cifar10' and 10 or 100,
                             args.widen_factor, dropRate=args.droprate)
@@ -394,10 +400,43 @@ def main():
                                               small_inputs=True,
                                               efficient=False)
 
+    global feature_num
+
+    feature_num = int(model.feature_num)
+
+    # isExists = os.path.exists(record_path)
+    # if not isExists:
+    #     os.makedirs(record_path)
+    #
+    # # filepath = os.path.join(record_path, args.checkpoint)
+    # # isExists = os.path.exists(filepath)
+    # # if not isExists:
+    # #     os.makedirs(filepath)
+
+    if not os.path.isdir(check_point):
+        mkdir_p(check_point)
+    # if not os.path.isdir(record_path):
+    #     mkdir_p(record_path)
+
+    global sp
+    sp = nn.CrossEntropyLoss().cuda()
+
+    global CoVariance
+
+    CoVariance = torch.zeros(class_num, feature_num, feature_num).cuda()
+
+    global CoVariance_used
+    CoVariance_used = torch.zeros(class_num, feature_num, feature_num).cuda()
+
+    global Ave
+    Ave = torch.zeros(class_num, feature_num).cuda()
+
+    global Amount
+    Amount = torch.zeros(class_num).cuda()
+
+    fc = Full_layer(feature_num, class_num)
+
     # get the number of model parameters
-
-    fc = Full_layer(class_num)
-
     print('Number of model parameters: {}'.format(
         sum([p.data.nelement() for p in model.parameters()])
         + sum([p.data.nelement() for p in fc.parameters()])
@@ -438,7 +477,7 @@ def main():
         start_epoch = 0
 
 
-    for epoch in range(start_epoch, args.epochs):
+    for epoch in range(start_epoch, training_configurations[args.model]['epochs']):
 
         adjust_learning_rate(optimizer, epoch + 1)
 
@@ -463,8 +502,14 @@ def main():
             'Amount': Amount,
             'val_acc': val_acc,
 
-        }, is_best, checkpoint=args.checkpoint)
+        }, is_best, checkpoint=check_point)
         print('Best accuracy: ', best_prec1)
+        np.savetxt(accuracy_file, np.array(val_acc))
+
+    print('Best accuracy: ', best_prec1)
+    val_acc.append(sum(val_acc[len(val_acc) - 10:]) / 10)
+    # np.savetxt(val_acc, np.array(val_acc))
+    np.savetxt(accuracy_file, np.array(val_acc))
 
 def train(train_loader, model, fc, criterion, optimizer, epoch):
     """Train for one epoch on the training set"""
@@ -518,7 +563,7 @@ def train(train_loader, model, fc, criterion, optimizer, epoch):
                       'Loss {loss.value:.4f} ({loss.ave:.4f})\t'
                       'Prec@1 {top1.value:.3f} ({top1.ave:.3f})\t'.format(
                        epoch, i+1, train_batches_num, batch_time=batch_time,
-                       loss=losses, top1=accuracy))
+                       loss=losses, top1=top1))
 
             print(string)
             # print(weights)
@@ -536,7 +581,7 @@ def validate(val_loader, model, fc, criterion, epoch):
     losses = AverageMeter()
     top1 = AverageMeter()
 
-    train_batches_num = len(test_loader)
+    train_batches_num = len(val_loader)
 
     # switch to evaluate mode
     model.eval()
@@ -577,7 +622,7 @@ def validate(val_loader, model, fc, criterion, epoch):
                       'Loss {loss.value:.4f} ({loss.ave:.4f})\t'
                       'Prec@1 {top1.value:.3f} ({top1.ave:.3f})\t'.format(
                        epoch, (i+1), train_batches_num, batch_time=batch_time,
-                       loss=losses, top1=accuracy))
+                       loss=losses, top1=top1))
             print(string)
             fd.write(string + '\n')
             fd.close()
@@ -588,16 +633,16 @@ def validate(val_loader, model, fc, criterion, epoch):
               'Loss {loss.value:.4f} ({loss.ave:.4f})\t'
               'Prec@1 {top1.value:.3f} ({top1.ave:.3f})\t'.format(
         epoch, (i + 1), train_batches_num, batch_time=batch_time,
-        loss=losses, top1=accuracy))
+        loss=losses, top1=top1))
     print(string)
     fd.write(string + '\n')
     fd.close()
-    val_acc.append(top1.avg)
+    val_acc.append(top1.ave)
     # log to TensorBoard
     # if args.tensorboard:
     #     log_value('val_loss', losses.avg, epoch)
     #     log_value('val_acc', top1.avg, epoch)
-    return top1.avg
+    return top1.ave
 
 
 def save_checkpoint(state, is_best, checkpoint='checkpoint', filename='checkpoint.pth.tar'):
@@ -613,16 +658,16 @@ class AverageMeter(object):
         self.reset()
 
     def reset(self):
-        self.val = 0
-        self.avg = 0
+        self.value = 0
+        self.ave = 0
         self.sum = 0
         self.count = 0
 
     def update(self, val, n=1):
-        self.val = val
+        self.value = val
         self.sum += val * n
         self.count += n
-        self.avg = self.sum / self.count
+        self.ave = self.sum / self.count
 
 
 def adjust_learning_rate(optimizer, epoch):

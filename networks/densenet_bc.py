@@ -133,7 +133,7 @@ class DenseNet(nn.Module):
 
         # Linear layer
 
-        self.num_features = num_features
+        self.feature_num = num_features
         # self.classifier = nn.Linear(num_features, num_classes)
 
         # Initialization

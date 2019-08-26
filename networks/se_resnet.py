@@ -8,7 +8,7 @@ Reference:
 import torch
 import torch.nn as nn
 import math
-from se_module import SELayer
+from networks.se_module import SELayer
 
 def conv3x3(in_planes, out_planes, stride=1):
     " 3x3 convolution with padding "
@@ -166,9 +166,11 @@ class PreActBottleneck(nn.Module):
 
 class ResNet_Cifar(nn.Module):
 
-    def __init__(self, block, layers, num_classes=10):
+    def __init__(self, block, layers, dropout_rate=0):
         super(ResNet_Cifar, self).__init__()
         self.inplanes = 16
+        self.feature_num = 64
+        self.dropout_rate = dropout_rate
         self.conv1 = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(16)
         self.relu = nn.ReLU(inplace=True)
@@ -197,10 +199,10 @@ class ResNet_Cifar(nn.Module):
             )
 
         layers = []
-        layers.append(block(self.inplanes, planes, stride, downsample))
+        layers.append(block(self.inplanes, planes, stride, downsample, dropout_rate=self.dropout_rate))
         self.inplanes = planes * block.expansion
         for _ in range(1, blocks):
-            layers.append(block(self.inplanes, planes))
+            layers.append(block(self.inplanes, planes, dropout_rate=self.dropout_rate))
 
         return nn.Sequential(*layers)
 
@@ -215,16 +217,6 @@ class ResNet_Cifar(nn.Module):
 
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
-
-
-
-
-        # x = self.kkk(x)
-
-
-
-
-        # x = self.fc(x)
 
         return x
 

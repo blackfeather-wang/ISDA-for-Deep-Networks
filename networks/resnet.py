@@ -165,6 +165,8 @@ class ResNet_Cifar(nn.Module):
     def __init__(self, block, layers, dropout_rate=0):
         super(ResNet_Cifar, self).__init__()
         self.inplanes = 16
+        self.dropout_rate = dropout_rate
+        self.feature_num = 64
         self.conv1 = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(16)
         self.relu = nn.ReLU(inplace=True)
@@ -173,7 +175,6 @@ class ResNet_Cifar(nn.Module):
         self.layer3 = self._make_layer(block, 64, layers[2], stride=2)
         self.avgpool = nn.AvgPool2d(8, stride=1)
 
-        self.dropout_rate = dropout_rate
 
         # self.kkk = torch.nn.Linear(64, 2)
         # self.fc = nn.Linear(64 * block.expansion, num_classes)
