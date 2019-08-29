@@ -3,6 +3,7 @@ import os
 import shutil
 import time
 import errno
+import math
 
 import torch
 import torch.nn as nn
@@ -11,9 +12,10 @@ import torch.nn.parallel
 import torch.backends.cudnn as cudnn
 import torch.optim
 import torch.utils.data
-import torchvision.transforms as transforms
+import transforms
 import torchvision.datasets as datasets
 from autoaugment import CIFAR10Policy
+from cutout import Cutout
 from torch.autograd import Variable
 
 import networks.resnet
@@ -21,9 +23,15 @@ import networks.wideresnet
 import networks.se_resnet
 import networks.se_wideresnet
 import networks.densenet_bc
+import networks.shake_pyramidnet
+import networks.resnext
+import networks.shake_shake
 import numpy as np
 
 # from wideresnet import WideResNet
+
+
+print('')
 
 # Configurations adopted for training deep networks.
 # (specialized for each type of models)
@@ -72,13 +80,44 @@ training_configurations = {
         'epochs': 300,
         'batch_size': 64,
         'initial_learning_rate': 0.1,
-        'changing_lr': [150, 225],
+        'changing_lr': [150, 200, 250],
+        'lr_decay_rate': 0.1,
+        'momentum': 0.9,
+        'nesterov': True,
+        'weight_decay': 1e-4,
+    },
+    'shake_pyramidnet': {
+        'epochs': 1800,
+        'batch_size': 128,
+        'initial_learning_rate': 0.1,
+        'changing_lr': [],
+        'lr_decay_rate': 0.1,
+        'momentum': 0.9,
+        'nesterov': True,
+        'weight_decay': 1e-4,
+    },
+    'resnext': {
+        'epochs': 350,
+        'batch_size': 128,
+        'initial_learning_rate': 0.1,
+        'changing_lr': [150, 225, 300],
+        'lr_decay_rate': 0.1,
+        'momentum': 0.9,
+        'nesterov': True,
+        'weight_decay': 5e-4,
+    },
+    'shake_shake': {
+        'epochs': 1800,
+        'batch_size': 128,
+        'initial_learning_rate': 0.2,
+        'changing_lr': [],
         'lr_decay_rate': 0.1,
         'momentum': 0.9,
         'nesterov': True,
         'weight_decay': 1e-4,
     },
 }
+
 
 
 parser = argparse.ArgumentParser(description='PyTorch WideResNet Training')
@@ -103,6 +142,11 @@ parser.add_argument('--compression-rate', default=0.5, type=float,
                     help='compression rate for densenet_bc (default: 0.5)')
 parser.add_argument('--bn-size', default=4, type=int,
                     help='cmultiplicative factor of bottle neck layers for densenet_bc (default: 4)')
+
+
+parser.add_argument('--alpha', default=200, type=int,
+                    help='hyper-parameter alpha for shake_pyramidnet')
+
 
 parser.add_argument('--droprate', default=0.0, type=float,
                     help='dropout probability (default: 0.0)')
@@ -165,6 +209,7 @@ record_path = './ISDA test/' + str(args.dataset) \
               + '-' + str(args.layers) \
               + (('-' + str(args.widen_factor)) if 'wide' in args.model else '') \
               + (('-' + str(args.growth_rate)) if 'dense' in args.model else '') \
+              + (('-' + str(args.alpha)) if 'shake' in args.model else '') \
               + '_' + str(args.name) \
               + '/' + 'no_' + str(args.no) \
               + '_combine-ratio_' + str(args.combine_ratio) \
@@ -337,7 +382,6 @@ def main():
 
     class_num = args.dataset == 'cifar10' and 10 or 100
 
-
     normalize = transforms.Normalize(mean=[x/255.0 for x in [125.3, 123.0, 113.9]],
                                      std=[x/255.0 for x in [63.0, 62.1, 66.7]])
 
@@ -347,16 +391,18 @@ def main():
             transforms.RandomCrop(32, padding=4),
             transforms.RandomHorizontalFlip(),
             ])
-        if args.erasing:
+        if args.autoaugment:
             print('Autoaugment')
             transform_train.transforms.append(CIFAR10Policy())
+
+        transform_train.transforms.append(transforms.ToTensor())
         if args.erasing:
             print('Random erasing augmentation')
             transform_train.transforms.append(transforms.RandomErasing(probability=args.p, sh=args.sh, r1=args.r1))
         if args.cutout:
             print('Cutout augmentation')
-            transform_train.transforms.append(transforms.Cutout(n_holes=args.n_holes, length=args.length))
-        transform_train.transforms.append(transforms.ToTensor())
+            transform_train.transforms.append(Cutout(n_holes=args.n_holes, length=args.length))
+            # transform_train.transforms.append(transforms.Cutout(n_holes=args.n_holes, length=args.length))
         transform_train.transforms.append(normalize)
     else:
         transform_train = transforms.Compose([
@@ -368,7 +414,7 @@ def main():
         normalize
         ])
 
-    kwargs = {'num_workers': 1, 'pin_memory': True}
+    kwargs = {'num_workers': 4, 'pin_memory': True}
     assert(args.dataset == 'cifar10' or args.dataset == 'cifar100')
     train_loader = torch.utils.data.DataLoader(
         datasets.__dict__[args.dataset.upper()]('../data', train=True, download=True,
@@ -399,9 +445,18 @@ def main():
                                               drop_rate=args.droprate,
                                               small_inputs=True,
                                               efficient=False)
+    elif args.model == 'shake_pyramidnet':
+        model = networks.shake_pyramidnet.PyramidNet(dataset=args.dataset, depth=args.layers, alpha=args.alpha, num_classes=class_num, bottleneck = True)
+
+    elif args.model == 'resnext':
+        model = networks.resnext.resnext29_8_64(class_num)
+
+
+    elif args.model == 'shake_shake':
+        model = networks.shake_shake.shake_resnet26_2x112d(class_num)
+
 
     global feature_num
-
     feature_num = int(model.feature_num)
 
     # isExists = os.path.exists(record_path)
@@ -435,6 +490,9 @@ def main():
     Amount = torch.zeros(class_num).cuda()
 
     fc = Full_layer(feature_num, class_num)
+
+
+    print(feature_num)
 
     # get the number of model parameters
     print('Number of model parameters: {}'.format(
@@ -476,8 +534,18 @@ def main():
     else:
         start_epoch = 0
 
+    print(training_configurations[args.model]['epochs'])
+
 
     for epoch in range(start_epoch, training_configurations[args.model]['epochs']):
+
+
+
+        for param_group in optimizer.param_groups:
+            print('learning rate:')
+            print(param_group['lr'])
+
+
 
         adjust_learning_rate(optimizer, epoch + 1)
 
@@ -525,7 +593,7 @@ def train(train_loader, model, fc, criterion, optimizer, epoch):
 
     end = time.time()
     for i, (input, target) in enumerate(train_loader):
-        target = target.cuda(async=True)
+        target = target.cuda() #async=True
         input = input.cuda()
         input_var = torch.autograd.Variable(input)
         target_var = torch.autograd.Variable(target)
@@ -589,7 +657,7 @@ def validate(val_loader, model, fc, criterion, epoch):
 
     end = time.time()
     for i, (input, target) in enumerate(val_loader):
-        target = target.cuda(async=True)
+        target = target.cuda() # async=True
         input = input.cuda()
         input_var = torch.autograd.Variable(input)
         target_var = torch.autograd.Variable(target)
@@ -672,12 +740,17 @@ class AverageMeter(object):
 
 def adjust_learning_rate(optimizer, epoch):
     """Sets the learning rate to the initial LR divided by 5 at 60th, 120th and 160th epochs"""
+    if not args.cos_lr:
+        if epoch in training_configurations[args.model]['changing_lr']:
+            for param_group in optimizer.param_groups:
+                param_group['lr'] *= training_configurations[args.model]['lr_decay_rate']
 
-    if epoch in training_configurations[args.model]['changing_lr']:
+    else:
         for param_group in optimizer.param_groups:
-            param_group['lr'] *= training_configurations[args.model]['initial_learning_rate']
+            param_group['lr'] = 0.5 * training_configurations[args.model]['initial_learning_rate']\
+                                * (1 + math.cos(math.pi * epoch / training_configurations[args.model]['epochs']))
 
-    # lr = args.lr * ((0.2 ** int(epoch >= 60)) * (0.2 ** int(epoch >= 120))* (0.2 ** int(epoch >= 160)))
+        # lr = args.lr * ((0.2 ** int(epoch >= 60)) * (0.2 ** int(epoch >= 120))* (0.2 ** int(epoch >= 160)))
     # log to TensorBoard
     # if args.tensorboard:
     #     log_value('learning_rate', lr, epoch)
