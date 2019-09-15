@@ -28,98 +28,6 @@ import networks.resnext
 import networks.shake_shake
 import numpy as np
 
-# from wideresnet import WideResNet
-
-
-print('')
-
-# Configurations adopted for training deep networks.
-# (specialized for each type of models)
-training_configurations = {
-    'resnet': {
-        'epochs': 200,
-        'batch_size': 128,
-        'initial_learning_rate': 0.1,
-        'changing_lr': [80, 120, 160],
-        'lr_decay_rate': 0.1,
-        'momentum': 0.9,
-        'nesterov': True,
-        'weight_decay': 1e-4,
-    },
-    'wideresnet': {
-        'epochs': 240,
-        'batch_size': 128,
-        'initial_learning_rate': 0.1,
-        'changing_lr': [60, 120, 160, 200],
-        'lr_decay_rate': 0.2,
-        'momentum': 0.9,
-        'nesterov': True,
-        'weight_decay': 5e-4,
-    },
-    'se_resnet': {
-        'epochs': 200,
-        'batch_size': 128,
-        'initial_learning_rate': 0.1,
-        'changing_lr': [80, 120, 160],
-        'lr_decay_rate': 0.1,
-        'momentum': 0.9,
-        'nesterov': True,
-        'weight_decay': 1e-4,
-    },
-    'se_wideresnet': {
-        'epochs': 240,
-        'batch_size': 128,
-        'initial_learning_rate': 0.1,
-        'changing_lr': [60, 120, 160, 200],
-        'lr_decay_rate': 0.2,
-        'momentum': 0.9,
-        'nesterov': True,
-        'weight_decay': 5e-4,
-    },
-    'densenet_bc': {
-        'epochs': 300,
-        'batch_size': 64,
-        'initial_learning_rate': 0.1,
-        'changing_lr': [150, 200, 250],
-        'lr_decay_rate': 0.1,
-        'momentum': 0.9,
-        'nesterov': True,
-        'weight_decay': 1e-4,
-    },
-    'shake_pyramidnet': {
-        'epochs': 1800,
-        'batch_size': 128,
-        'initial_learning_rate': 0.1,
-        'changing_lr': [],
-        'lr_decay_rate': 0.1,
-        'momentum': 0.9,
-        'nesterov': True,
-        'weight_decay': 1e-4,
-    },
-    'resnext': {
-        'epochs': 350,
-        'batch_size': 128,
-        'initial_learning_rate': 0.1,
-        'changing_lr': [150, 225, 300],
-        'lr_decay_rate': 0.1,
-        'momentum': 0.9,
-        'nesterov': True,
-        'weight_decay': 5e-4,
-    },
-    'shake_shake': {
-        'epochs': 1800,
-        'batch_size': 128,
-        'initial_learning_rate': 0.2,
-        'changing_lr': [],
-        'lr_decay_rate': 0.1,
-        'momentum': 0.9,
-        'nesterov': True,
-        'weight_decay': 1e-4,
-    },
-}
-
-
-
 parser = argparse.ArgumentParser(description='PyTorch WideResNet Training')
 parser.add_argument('--dataset', default='cifar10', type=str,
                     help='dataset (cifar10 [default] or cifar100)')
@@ -135,6 +43,9 @@ parser.add_argument('--layers', default=0, type=int,
 
 parser.add_argument('--widen-factor', default=10, type=int,
                     help='widen factor for wideresnet (default: 10)')
+
+parser.add_argument('--cardinality', default=8, type=int,
+                    help='cardinality for resnext (default: 8)')
 
 parser.add_argument('--growth-rate', default=12, type=int,
                     help='growth rate for densenet_bc (default: 12)')
@@ -199,17 +110,116 @@ parser.add_argument('--cos_lr', dest='cos_lr', action='store_true',
                     help='whether to use cosine learning rate')
 parser.set_defaults(cos_lr=False)
 
-parser.add_argument('--tensorboard',
-                    help='Log progress to TensorBoard', action='store_true')
 args = parser.parse_args()
 
+
+# Configurations adopted for training deep networks.
+# (specialized for each type of models)
+training_configurations = {
+    'resnet': {
+        'epochs': 200,
+        'batch_size': 128,
+        'initial_learning_rate': 0.1,
+        'changing_lr': [80, 120, 160],
+        'lr_decay_rate': 0.1,
+        'momentum': 0.9,
+        'nesterov': True,
+        'weight_decay': 1e-4,
+    },
+    'wideresnet': {
+        'epochs': 240,
+        'batch_size': 128,
+        'initial_learning_rate': 0.1,
+        'changing_lr': [60, 120, 160, 200],
+        'lr_decay_rate': 0.2,
+        'momentum': 0.9,
+        'nesterov': True,
+        'weight_decay': 5e-4,
+    },
+    'se_resnet': {
+        'epochs': 200,
+        'batch_size': 128,
+        'initial_learning_rate': 0.1,
+        'changing_lr': [80, 120, 160],
+        'lr_decay_rate': 0.1,
+        'momentum': 0.9,
+        'nesterov': True,
+        'weight_decay': 1e-4,
+    },
+    'se_wideresnet': {
+        'epochs': 240,
+        'batch_size': 128,
+        'initial_learning_rate': 0.1,
+        'changing_lr': [60, 120, 160, 200],
+        'lr_decay_rate': 0.2,
+        'momentum': 0.9,
+        'nesterov': True,
+        'weight_decay': 5e-4,
+    },
+    'densenet_bc': {
+        'epochs': 350,
+        'batch_size': 64,
+        'initial_learning_rate': 0.1,
+        'changing_lr': [150, 225, 300],
+        'lr_decay_rate': 0.1,
+        'momentum': 0.9,
+        'nesterov': True,
+        'weight_decay': 1e-4,
+    },
+    'shake_pyramidnet': {
+        'epochs': 1800,
+        'batch_size': 128,
+        'initial_learning_rate': 0.1,
+        'changing_lr': [],
+        'lr_decay_rate': 0.1,
+        'momentum': 0.9,
+        'nesterov': True,
+        'weight_decay': 1e-4,
+    },
+    'resnext': {
+        'epochs': 350,
+        'batch_size': 128,
+        'initial_learning_rate': 0.05,
+        'changing_lr': [150, 225, 300],
+        'lr_decay_rate': 0.1,
+        'momentum': 0.9,
+        'nesterov': True,
+        'weight_decay': 5e-4,
+    },
+}
+
+
+if args.dataset == 'cifar10':
+    training_configurations['shake_shake'] = {
+        'epochs': 1800,
+        'batch_size': 64,
+        'initial_learning_rate': 0.1,
+        'changing_lr': [],
+        'lr_decay_rate': 0.1,
+        'momentum': 0.9,
+        'nesterov': True,
+        'weight_decay': 1e-4,
+    }
+elif args.dataset == 'cifar100':
+    training_configurations['shake_shake'] = {
+        'epochs': 1800,
+        'batch_size': 128,
+        'initial_learning_rate': 0.2,
+        'changing_lr': [],
+        'lr_decay_rate': 0.1,
+        'momentum': 0.9,
+        'nesterov': True,
+        'weight_decay': 1e-4,
+    }
 
 record_path = './ISDA test/' + str(args.dataset) \
               + '_' + str(args.model) \
               + '-' + str(args.layers) \
               + (('-' + str(args.widen_factor)) if 'wide' in args.model else '') \
+              + (('-' + str(args.widen_factor)) if 'shake_shake' in args.model else '') \
               + (('-' + str(args.growth_rate)) if 'dense' in args.model else '') \
-              + (('-' + str(args.alpha)) if 'shake' in args.model else '') \
+              + (('-' + str(args.alpha)) if 'pyramidnet' in args.model else '') \
+              + (('-' + str(args.cardinality)) if 'resnext' in args.model else '') \
               + '_' + str(args.name) \
               + '/' + 'no_' + str(args.no) \
               + '_combine-ratio_' + str(args.combine_ratio) \
@@ -220,27 +230,21 @@ record_path = './ISDA test/' + str(args.dataset) \
               + ('_cutout_' if args.cutout else '') \
               + ('_cos-lr_' if args.cos_lr else '')
 
-
-# print(record_path)
-# input()
 record_file = record_path + '/training_process.txt'
 accuracy_file = record_path + '/accuracy_epoch.txt'
 loss_file = record_path + '/loss_epoch.txt'
 check_point = os.path.join(record_path, args.checkpoint)
 
 
-class MarginalizedLoss(nn.Module):
+class ISDALoss(nn.Module):
     def __init__(self):
-        super(MarginalizedLoss, self).__init__()
+        super(ISDALoss, self).__init__()
 
     def forward(self, features, fc, labels, epoch, iter, classification_result):
 
         global CoVariance
         global Ave
         global Amount
-        global CoVariance_used
-
-
 
         ratio = args.combine_ratio * (epoch / (training_configurations[args.model]['epochs']))
 
@@ -300,14 +304,9 @@ class MarginalizedLoss(nn.Module):
         CoVariance = (CoVariance.mul(1 - weight_CV) + var_temp
                       .mul(weight_CV)).detach() + additional_CV.detach()
 
-        # print(CoVariance)
-        # input()
-
         Ave = (Ave.mul(1 - weight_AV) + ave_CxA.mul(weight_AV)).detach()
 
         Amount += onehot.sum(0)
-
-        bias = list(fc.parameters())[1]
 
         weight_m = list(fc.parameters())[0]
 
@@ -318,41 +317,27 @@ class MarginalizedLoss(nn.Module):
                               labels.view(N, 1, 1)
                               .expand(N, C, A))
 
-
-
-        Nxbi = bias.expand(N, C)
-
-        Nxbk = torch.gather(Nxbi,
-                            1,
-                            labels.view(N, 1)
-                            .expand(N, C))
-
         CV_temp = CoVariance[labels]
 
         sigma2 = ratio * \
                  torch.bmm(torch.bmm(NxW_ij - NxW_kj,
-                           CV_temp),
+                                     CV_temp),
                            (NxW_ij - NxW_kj).permute(0, 2, 1))
 
         sigma2 = sigma2.mul(torch.eye(C).cuda()
                             .expand(N, C, C)).sum(2).view(N, C)
 
-
         temp = classification_result + 0.5 * sigma2
-
         temp = - torch.gather(F.log_softmax(temp, 1), 1, labels.view(-1, 1))
-
-
-
         loss = torch.sum(temp)
-        return loss
+        return loss / N
 
 
 class Full_layer(torch.nn.Module):
 
     def __init__(self, feature_num, class_num):
         super(Full_layer, self).__init__()
-        # self.class_num = class_num
+        self.class_num = class_num
         self.fc = nn.Linear(feature_num, class_num)
 
     def forward(self, x):
@@ -382,13 +367,12 @@ def main():
 
     class_num = args.dataset == 'cifar10' and 10 or 100
 
-    normalize = transforms.Normalize(mean=[x/255.0 for x in [125.3, 123.0, 113.9]],
-                                     std=[x/255.0 for x in [63.0, 62.1, 66.7]])
-
+    normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
+                                     std=[x / 255.0 for x in [63.0, 62.1, 66.7]])
     if args.augment:
         print('Standard augmentation')
         transform_train = transforms.Compose([
-            transforms.RandomCrop(32, padding=4),
+            transforms.RandomCrop(32, padding=4),  # fill parameter needs torchvision installed from source
             transforms.RandomHorizontalFlip(),
             ])
         if args.autoaugment:
@@ -414,7 +398,7 @@ def main():
         normalize
         ])
 
-    kwargs = {'num_workers': 4, 'pin_memory': True}
+    kwargs = {'num_workers': 1, 'pin_memory': True}
     assert(args.dataset == 'cifar10' or args.dataset == 'cifar100')
     train_loader = torch.utils.data.DataLoader(
         datasets.__dict__[args.dataset.upper()]('../data', train=True, download=True,
@@ -449,39 +433,27 @@ def main():
         model = networks.shake_pyramidnet.PyramidNet(dataset=args.dataset, depth=args.layers, alpha=args.alpha, num_classes=class_num, bottleneck = True)
 
     elif args.model == 'resnext':
-        model = networks.resnext.resnext29_8_64(class_num)
-
+        if args.cardinality == 8:
+            model = networks.resnext.resnext29_8_64(class_num)
+        if args.cardinality == 16:
+            model = networks.resnext.resnext29_16_64(class_num)
 
     elif args.model == 'shake_shake':
-        model = networks.shake_shake.shake_resnet26_2x112d(class_num)
-
+        if args.widen_factor == 112:
+            model = networks.shake_shake.shake_resnet26_2x112d(class_num)
+        if args.widen_factor == 32:
+            model = networks.shake_shake.shake_resnet26_2x32d(class_num)
+        if args.widen_factor == 96:
+            model = networks.shake_shake.shake_resnet26_2x32d(class_num)
 
     global feature_num
     feature_num = int(model.feature_num)
 
-    # isExists = os.path.exists(record_path)
-    # if not isExists:
-    #     os.makedirs(record_path)
-    #
-    # # filepath = os.path.join(record_path, args.checkpoint)
-    # # isExists = os.path.exists(filepath)
-    # # if not isExists:
-    # #     os.makedirs(filepath)
-
     if not os.path.isdir(check_point):
         mkdir_p(check_point)
-    # if not os.path.isdir(record_path):
-    #     mkdir_p(record_path)
-
-    global sp
-    sp = nn.CrossEntropyLoss().cuda()
 
     global CoVariance
-
     CoVariance = torch.zeros(class_num, feature_num, feature_num).cuda()
-
-    global CoVariance_used
-    CoVariance_used = torch.zeros(class_num, feature_num, feature_num).cuda()
 
     global Ave
     Ave = torch.zeros(class_num, feature_num).cuda()
@@ -491,10 +463,10 @@ def main():
 
     fc = Full_layer(feature_num, class_num)
 
+    print('Number of final features: {}'.format(
+        feature_num)
+    )
 
-    print(feature_num)
-
-    # get the number of model parameters
     print('Number of model parameters: {}'.format(
         sum([p.data.nelement() for p in model.parameters()])
         + sum([p.data.nelement() for p in fc.parameters()])
@@ -506,8 +478,8 @@ def main():
     cudnn.benchmark = True
 
     # define loss function (criterion) and optimizer
-    criterion = MarginalizedLoss().cuda()
-    criterion_sp = nn.CrossEntropyLoss().cuda()
+    isda_criterion = ISDALoss().cuda()
+    ce_criterion = nn.CrossEntropyLoss().cuda()
 
     optimizer = torch.optim.SGD([{'params': model.parameters()},
                                 {'params': fc.parameters()}],
@@ -515,6 +487,10 @@ def main():
                                 momentum=training_configurations[args.model]['momentum'],
                                 nesterov=training_configurations[args.model]['nesterov'],
                                 weight_decay=training_configurations[args.model]['weight_decay'])
+
+    print(optimizer)
+    input()
+
     if args.resume:
         # Load checkpoint.
         print('==> Resuming from checkpoint..')
@@ -534,26 +510,15 @@ def main():
     else:
         start_epoch = 0
 
-    print(training_configurations[args.model]['epochs'])
-
-
     for epoch in range(start_epoch, training_configurations[args.model]['epochs']):
-
-
-
-        for param_group in optimizer.param_groups:
-            print('learning rate:')
-            print(param_group['lr'])
-
-
 
         adjust_learning_rate(optimizer, epoch + 1)
 
         # train for one epoch
-        train(train_loader, model, fc, criterion, optimizer, epoch)
+        train(train_loader, model, fc, isda_criterion, optimizer, epoch)
 
         # evaluate on validation set
-        prec1 = validate(val_loader, model, fc, criterion_sp, epoch)
+        prec1 = validate(val_loader, model, fc, ce_criterion, epoch)
 
         # remember best prec@1 and save checkpoint
         is_best = prec1 > best_prec1
@@ -592,10 +557,10 @@ def train(train_loader, model, fc, criterion, optimizer, epoch):
     fc.train()
 
     end = time.time()
-    for i, (input, target) in enumerate(train_loader):
-        target = target.cuda() #async=True
-        input = input.cuda()
-        input_var = torch.autograd.Variable(input)
+    for i, (x, target) in enumerate(train_loader):
+        target = target.cuda(async=True)
+        x = x.cuda()
+        input_var = torch.autograd.Variable(x)
         target_var = torch.autograd.Variable(target)
 
         # compute output
@@ -603,22 +568,18 @@ def train(train_loader, model, fc, criterion, optimizer, epoch):
         features = model(input_var)
         output = fc(features)
         loss = criterion(features, fc, target_var, epoch, i, output)
-        loss /= target.size(0)
-
-        # output = model(input_var)
-        # loss = criterion(output, target_var)
 
         # measure accuracy and record loss
         prec1 = accuracy(output.data, target, topk=(1,))[0]
-        losses.update(loss.data.item(), input.size(0))
-        top1.update(prec1.item(), input.size(0))
+        losses.update(loss.data.item(), x.size(0))
+        top1.update(prec1.item(), x.size(0))
 
         # compute gradient and do SGD step
         optimizer.zero_grad()
         loss.backward()
+
         optimizer.step()
 
-        # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
 
@@ -638,10 +599,6 @@ def train(train_loader, model, fc, criterion, optimizer, epoch):
             fd.write(string + '\n')
             fd.close()
 
-    # log to TensorBoard
-    # if args.tensorboard:
-    #     log_value('train_loss', losses.avg, epoch)
-    #     log_value('train_acc', top1.avg, epoch)
 
 def validate(val_loader, model, fc, criterion, epoch):
     """Perform validation on the validation set"""
@@ -657,7 +614,7 @@ def validate(val_loader, model, fc, criterion, epoch):
 
     end = time.time()
     for i, (input, target) in enumerate(val_loader):
-        target = target.cuda() # async=True
+        target = target.cuda(async=True)
         input = input.cuda()
         input_var = torch.autograd.Variable(input)
         target_var = torch.autograd.Variable(target)
@@ -666,10 +623,6 @@ def validate(val_loader, model, fc, criterion, epoch):
         with torch.no_grad():
             features = model(input_var)
             output = fc(features)
-            # features = model(input_var)
-            # output = fc(features)
-            # loss = criterion(features, fc, target_var, epoch, i, output)
-            # loss /= target.size(0)
 
         loss = criterion(output, target_var)
 
@@ -706,10 +659,7 @@ def validate(val_loader, model, fc, criterion, epoch):
     fd.write(string + '\n')
     fd.close()
     val_acc.append(top1.ave)
-    # log to TensorBoard
-    # if args.tensorboard:
-    #     log_value('val_loss', losses.avg, epoch)
-    #     log_value('val_acc', top1.avg, epoch)
+
     return top1.ave
 
 
@@ -749,11 +699,6 @@ def adjust_learning_rate(optimizer, epoch):
         for param_group in optimizer.param_groups:
             param_group['lr'] = 0.5 * training_configurations[args.model]['initial_learning_rate']\
                                 * (1 + math.cos(math.pi * epoch / training_configurations[args.model]['epochs']))
-
-        # lr = args.lr * ((0.2 ** int(epoch >= 60)) * (0.2 ** int(epoch >= 120))* (0.2 ** int(epoch >= 160)))
-    # log to TensorBoard
-    # if args.tensorboard:
-    #     log_value('learning_rate', lr, epoch)
 
 
 def accuracy(output, target, topk=(1,)):
