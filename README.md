@@ -80,10 +80,12 @@ The model needs to output deep features instead of inference results:
 optimizer = torch.optim.SGD([{'params_model': model.parameters()},
                              {'params_fc': fc.parameters()}],
                              ......)
-...
+......
+from ISDA import ISDALoss
+isda_criterion = ISDALoss(model.feature_num, class_num).cuda()
+......
 ratio = args.combine_ratio * (epoch / (training_configurations[args.model]['epochs']))
-loss, output = criterion(model, fc, input, target, ratio)
-
+loss, output = criterion(model, fc, input_var, target_var, ratio)
 ```
 
 
@@ -150,4 +152,6 @@ This repo is based on the codes from https://github.com/xternalz/WideResNet-pyto
 9. AutoAugment
     - Paper : http://openaccess.thecvf.com/content_CVPR_2019/papers/Cubuk_AutoAugment_Learning_Augmentation_Strategies_From_Data_CVPR_2019_paper.pdf
     - Code : https://github.com/DeepVoltaire/AutoAugment
-
+10. Cutout
+    - Paper : https://arxiv.org/pdf/1708.04552.pdf
+    - Code : https://github.com/uoguelph-mlrg/Cutout

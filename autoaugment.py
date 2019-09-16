@@ -5,11 +5,9 @@ import random
 
 class ImageNetPolicy(object):
     """ Randomly choose one of the best 24 Sub-policies on ImageNet.
-
         Example:
         >>> policy = ImageNetPolicy()
         >>> transformed = policy(image)
-
         Example as a PyTorch Transform:
         >>> transform=transforms.Compose([
         >>>     transforms.Resize(256),
@@ -60,11 +58,9 @@ class ImageNetPolicy(object):
 
 class CIFAR10Policy(object):
     """ Randomly choose one of the best 25 Sub-policies on CIFAR10.
-
         Example:
         >>> policy = CIFAR10Policy()
         >>> transformed = policy(image)
-
         Example as a PyTorch Transform:
         >>> transform=transforms.Compose([
         >>>     transforms.Resize(256),
@@ -115,11 +111,9 @@ class CIFAR10Policy(object):
 
 class SVHNPolicy(object):
     """ Randomly choose one of the best 25 Sub-policies on SVHN.
-
         Example:
         >>> policy = SVHNPolicy()
         >>> transformed = policy(image)
-
         Example as a PyTorch Transform:
         >>> transform=transforms.Compose([
         >>>     transforms.Resize(256),
