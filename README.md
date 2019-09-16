@@ -9,7 +9,7 @@ In this paper, we propose a novel implicit semantic data augmentation (ISDA) app
 
 
 <p align="center">
-    <img src="ISDA-overview.png" height="418" width= "1000">
+    <img src="ISDA-overview.png" height="334" width= "800">
 </p>
 
 
@@ -48,11 +48,11 @@ CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar100 --model shake_shake --
 ## Results
 
 <p align="center">
-    <img src="ISDA-cifar-1.png" height="532" width= "900">
+    <img src="ISDA-cifar-1.png" height="414" width= "700">
 </p>
 
 <p align="center">
-    <img src="ISDA-cifar-2.png" height="284" width= "900">
+    <img src="ISDA-cifar-2.png" height="221" width= "700">
 </p>
 
 
