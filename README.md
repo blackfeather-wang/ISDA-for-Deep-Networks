@@ -32,16 +32,16 @@ If you find this work useful or use our codes in your own research, please use t
 Train Wide-ResNet-28-10 on CIFAR-10 / 100 with ISDA
 
 ```
-$ CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar10 --model wideresnet --layers 28 --widen-factor 10 --combine-ratio 0.5 --droprate 0.3
-$ CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar100 --model wideresnet --layers 28 --widen-factor 10 --combine-ratio 0.5 --droprate 0.3
+CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar10 --model wideresnet --layers 28 --widen-factor 10 --combine-ratio 0.5 --droprate 0.3
+CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar100 --model wideresnet --layers 28 --widen-factor 10 --combine-ratio 0.5 --droprate 0.3
 
 ```
 
 Train Shake-Shake(26, 2x112d) on CIFAR-10 / 100 with ISDA and AutoAugment
 
 ```
-$ CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar10 --model shake_shake --widen-factor 112 --combine-ratio 0.5 --cos_lr --autoaugment
-$ CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar100 --model shake_shake --widen-factor 112 --combine-ratio 0.5 --cos_lr --autoaugment
+CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar10 --model shake_shake --widen-factor 112 --combine-ratio 0.5 --cos_lr --autoaugment
+CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar100 --model shake_shake --widen-factor 112 --combine-ratio 0.5 --cos_lr --autoaugment
 
 ```
 
@@ -97,9 +97,11 @@ loss, output = criterion(model, fc, input, target, ratio)
 
 --dataset : cifar10 or cifar100
 
---model : deep networks to be trained, chhoose from {resnet, wideresnet, resnext, se_resnet, se_wideresnet, densenet_bc, shake_shake, shake_pyramidnet}
+--model : deep networks to be trained, choose from {resnet, wideresnet, resnext, se_resnet, se_wideresnet, densenet_bc, shake_shake, shake_pyramidnet}
 
 --layers : total number of layers
+
+--combine-ratio : hyper-parameter \lambda for ISDA (we recommend 0.5 for naive implementation.)
 
 --droprate : specify the dropout rate
 
