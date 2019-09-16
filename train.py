@@ -16,7 +16,7 @@ import transforms
 import torchvision.datasets as datasets
 from autoaugment import CIFAR10Policy
 from cutout import Cutout
-from torch.autograd import Variable
+from ISDA import EstimatorCV, ISDALoss
 
 import networks.resnet
 import networks.wideresnet
@@ -41,31 +41,12 @@ parser.add_argument('--print-freq', '-p', default=10, type=int,
 parser.add_argument('--layers', default=0, type=int,
                     help='total number of layers (have to be explicitly given!)')
 
-parser.add_argument('--widen-factor', default=10, type=int,
-                    help='widen factor for wideresnet (default: 10)')
-
-parser.add_argument('--cardinality', default=8, type=int,
-                    help='cardinality for resnext (default: 8)')
-
-parser.add_argument('--growth-rate', default=12, type=int,
-                    help='growth rate for densenet_bc (default: 12)')
-parser.add_argument('--compression-rate', default=0.5, type=float,
-                    help='compression rate for densenet_bc (default: 0.5)')
-parser.add_argument('--bn-size', default=4, type=int,
-                    help='cmultiplicative factor of bottle neck layers for densenet_bc (default: 4)')
-
-
-parser.add_argument('--alpha', default=200, type=int,
-                    help='hyper-parameter alpha for shake_pyramidnet')
-
-
 parser.add_argument('--droprate', default=0.0, type=float,
                     help='dropout probability (default: 0.0)')
 
 parser.add_argument('--no-augment', dest='augment', action='store_false',
                     help='whether to use standard augmentation (default: True)')
 parser.set_defaults(augment=True)
-
 
 parser.add_argument('--checkpoint', default='checkpoint', type=str, metavar='PATH',
                     help='path to save checkpoint (default: checkpoint)')
@@ -80,16 +61,25 @@ parser.add_argument('--no', default='1', type=str,
 parser.add_argument('--combine-ratio', default=0.5, type=float,
                     help='hyper-patameter_\lambda for ISDA')
 
-# Random Erasing
-parser.add_argument('--erasing', dest='erasing', action='store_true',
-                    help='whether to use random erasing')
-parser.set_defaults(erasing=False)
-parser.add_argument('--p', default=0.5, type=float,
-                    help='Random Erasing probability')
-parser.add_argument('--sh', default=0.4, type=float,
-                    help='max erasing area')
-parser.add_argument('--r1', default=0.3, type=float,
-                    help='aspect of erasing area')
+# Wide-ResNet & Shake Shake
+parser.add_argument('--widen-factor', default=10, type=int,
+                    help='widen factor for wideresnet (default: 10)')
+
+# ResNeXt
+parser.add_argument('--cardinality', default=8, type=int,
+                    help='cardinality for resnext (default: 8)')
+
+# DenseNet
+parser.add_argument('--growth-rate', default=12, type=int,
+                    help='growth rate for densenet_bc (default: 12)')
+parser.add_argument('--compression-rate', default=0.5, type=float,
+                    help='compression rate for densenet_bc (default: 0.5)')
+parser.add_argument('--bn-size', default=4, type=int,
+                    help='cmultiplicative factor of bottle neck layers for densenet_bc (default: 4)')
+
+# Shake_PyramidNet
+parser.add_argument('--alpha', default=200, type=int,
+                    help='hyper-parameter alpha for shake_pyramidnet')
 
 # Autoaugment
 parser.add_argument('--autoaugment', dest='autoaugment', action='store_true',
@@ -117,10 +107,10 @@ args = parser.parse_args()
 # (specialized for each type of models)
 training_configurations = {
     'resnet': {
-        'epochs': 200,
+        'epochs': 160,
         'batch_size': 128,
         'initial_learning_rate': 0.1,
-        'changing_lr': [80, 120, 160],
+        'changing_lr': [80, 120],
         'lr_decay_rate': 0.1,
         'momentum': 0.9,
         'nesterov': True,
@@ -226,7 +216,6 @@ record_path = './ISDA test/' + str(args.dataset) \
               + ('_standard-Aug_' if args.augment else '') \
               + ('_dropout_' if args.droprate > 0 else '') \
               + ('_autoaugment_' if args.autoaugment else '') \
-              + ('_erasing_' if args.erasing else '') \
               + ('_cutout_' if args.cutout else '') \
               + ('_cos-lr_' if args.cos_lr else '')
 
@@ -234,126 +223,6 @@ record_file = record_path + '/training_process.txt'
 accuracy_file = record_path + '/accuracy_epoch.txt'
 loss_file = record_path + '/loss_epoch.txt'
 check_point = os.path.join(record_path, args.checkpoint)
-
-
-class ISDALoss(nn.Module):
-    def __init__(self):
-        super(ISDALoss, self).__init__()
-
-    def forward(self, features, fc, labels, epoch, iter, classification_result):
-
-        global CoVariance
-        global Ave
-        global Amount
-
-        ratio = args.combine_ratio * (epoch / (training_configurations[args.model]['epochs']))
-
-        N = features.size(0)
-        C = class_num
-        A = features.size(1)
-
-        NxCxFeatures = features.view(
-            N, 1, A
-        ).expand(
-            N, C, A
-        )
-
-        onehot = torch.zeros(N, C).cuda()
-        onehot.scatter_(1, labels.view(-1, 1), 1)
-
-        NxCxA_onehot = onehot.view(N, C, 1).expand(N, C, A)
-
-
-        features_by_sort = NxCxFeatures.mul(NxCxA_onehot)
-
-        Amount_CxA = NxCxA_onehot.sum(0)
-        Amount_CxA[Amount_CxA == 0] = 1
-
-        ave_CxA = features_by_sort.sum(0) / Amount_CxA
-
-        var_temp = features_by_sort -\
-                   ave_CxA.expand(N, C, A).mul(NxCxA_onehot)
-
-        var_temp = torch.bmm(
-            var_temp.permute(1, 2, 0),
-            var_temp.permute(1, 0, 2)
-        ).div(Amount_CxA.view(C, A, 1).expand(C, A, A))
-
-
-        sum_weight_CV = onehot.sum(0).view(C, 1, 1).expand(C, A, A)
-
-        sum_weight_AV = onehot.sum(0).view(C, 1).expand(C, A)
-
-        weight_CV = sum_weight_CV.div(
-            sum_weight_CV + Amount.view(C, 1, 1).expand(C, A, A)
-        )
-        weight_CV[weight_CV != weight_CV] = 0
-
-        weight_AV = sum_weight_AV.div(
-            sum_weight_AV + Amount.view(C, 1).expand(C, A)
-        )
-        weight_AV[weight_AV != weight_AV] = 0
-
-        additional_CV = weight_CV.mul(1 - weight_CV).mul(
-            torch.bmm(
-                (Ave - ave_CxA).view(C, A, 1),
-                (Ave - ave_CxA).view(C, 1, A)
-            )
-        )
-
-        CoVariance = (CoVariance.mul(1 - weight_CV) + var_temp
-                      .mul(weight_CV)).detach() + additional_CV.detach()
-
-        Ave = (Ave.mul(1 - weight_AV) + ave_CxA.mul(weight_AV)).detach()
-
-        Amount += onehot.sum(0)
-
-        weight_m = list(fc.parameters())[0]
-
-        NxW_ij = weight_m.expand(N, C, A)
-
-        NxW_kj = torch.gather(NxW_ij,
-                              1,
-                              labels.view(N, 1, 1)
-                              .expand(N, C, A))
-
-        CV_temp = CoVariance[labels]
-
-        sigma2 = ratio * \
-                 torch.bmm(torch.bmm(NxW_ij - NxW_kj,
-                                     CV_temp),
-                           (NxW_ij - NxW_kj).permute(0, 2, 1))
-
-        sigma2 = sigma2.mul(torch.eye(C).cuda()
-                            .expand(N, C, C)).sum(2).view(N, C)
-
-        temp = classification_result + 0.5 * sigma2
-        temp = - torch.gather(F.log_softmax(temp, 1), 1, labels.view(-1, 1))
-        loss = torch.sum(temp)
-        return loss / N
-
-
-class Full_layer(torch.nn.Module):
-
-    def __init__(self, feature_num, class_num):
-        super(Full_layer, self).__init__()
-        self.class_num = class_num
-        self.fc = nn.Linear(feature_num, class_num)
-
-    def forward(self, x):
-        x = self.fc(x)
-        return x
-
-
-def mkdir_p(path):
-    '''make dir if not exist'''
-    try:
-        os.makedirs(path)
-    except OSError as exc:  # Python >2.5
-        if exc.errno == errno.EEXIST and os.path.isdir(path):
-            pass
-        else:
-            raise
 
 def main():
 
@@ -369,30 +238,54 @@ def main():
 
     normalize = transforms.Normalize(mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
                                      std=[x / 255.0 for x in [63.0, 62.1, 66.7]])
-    if args.augment:
-        print('Standard augmentation')
-        transform_train = transforms.Compose([
-            transforms.RandomCrop(32, padding=4),  # fill parameter needs torchvision installed from source
-            transforms.RandomHorizontalFlip(),
-            ])
-        if args.autoaugment:
-            print('Autoaugment')
-            transform_train.transforms.append(CIFAR10Policy())
 
-        transform_train.transforms.append(transforms.ToTensor())
-        if args.erasing:
-            print('Random erasing augmentation')
-            transform_train.transforms.append(transforms.RandomErasing(probability=args.p, sh=args.sh, r1=args.r1))
-        if args.cutout:
-            print('Cutout augmentation')
-            transform_train.transforms.append(Cutout(n_holes=args.n_holes, length=args.length))
-            # transform_train.transforms.append(transforms.Cutout(n_holes=args.n_holes, length=args.length))
-        transform_train.transforms.append(normalize)
+    if args.augment:
+        if args.autoaugment:
+            print('AutoAugment')
+            transform_train = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Lambda(lambda x: F.pad(x.unsqueeze(0),
+                                                  (4, 4, 4, 4), mode='reflect').squeeze()),
+                transforms.ToPILImage(),
+                transforms.RandomHorizontalFlip(), CIFAR10Policy(),
+                transforms.RandomCrop(32),
+                transforms.ToTensor(),
+                Cutout(n_holes=args.n_holes, length=args.length),
+                normalize,
+            ])
+
+        elif args.cutout:
+            print('Cutout')
+            transform_train = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Lambda(lambda x: F.pad(x.unsqueeze(0),
+                                                  (4, 4, 4, 4), mode='reflect').squeeze()),
+                transforms.ToPILImage(),
+                transforms.RandomCrop(32),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                Cutout(n_holes=args.n_holes, length=args.length),
+                normalize,
+            ])
+
+        else:
+            print('Standrad Augmentation!')
+            transform_train = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Lambda(lambda x: F.pad(x.unsqueeze(0),
+                                                  (4, 4, 4, 4), mode='reflect').squeeze()),
+                transforms.ToPILImage(),
+                transforms.RandomCrop(32),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                normalize,
+            ])
     else:
         transform_train = transforms.Compose([
-            transforms.ToTensor(),
-            normalize,
-            ])
+                    transforms.ToTensor(),
+                    normalize,
+                    ])
+
     transform_test = transforms.Compose([
         transforms.ToTensor(),
         normalize
@@ -446,25 +339,13 @@ def main():
         if args.widen_factor == 96:
             model = networks.shake_shake.shake_resnet26_2x32d(class_num)
 
-    global feature_num
-    feature_num = int(model.feature_num)
-
     if not os.path.isdir(check_point):
         mkdir_p(check_point)
 
-    global CoVariance
-    CoVariance = torch.zeros(class_num, feature_num, feature_num).cuda()
-
-    global Ave
-    Ave = torch.zeros(class_num, feature_num).cuda()
-
-    global Amount
-    Amount = torch.zeros(class_num).cuda()
-
-    fc = Full_layer(feature_num, class_num)
+    fc = Full_layer(int(model.feature_num), class_num)
 
     print('Number of final features: {}'.format(
-        feature_num)
+        int(model.feature_num))
     )
 
     print('Number of model parameters: {}'.format(
@@ -472,13 +353,10 @@ def main():
         + sum([p.data.nelement() for p in fc.parameters()])
     ))
 
-    model = torch.nn.DataParallel(model).cuda()
-    fc = nn.DataParallel(fc).cuda()
-
     cudnn.benchmark = True
 
     # define loss function (criterion) and optimizer
-    isda_criterion = ISDALoss().cuda()
+    isda_criterion = ISDALoss(int(model.feature_num), class_num).cuda()
     ce_criterion = nn.CrossEntropyLoss().cuda()
 
     optimizer = torch.optim.SGD([{'params': model.parameters()},
@@ -488,8 +366,8 @@ def main():
                                 nesterov=training_configurations[args.model]['nesterov'],
                                 weight_decay=training_configurations[args.model]['weight_decay'])
 
-    print(optimizer)
-    input()
+    model = torch.nn.DataParallel(model).cuda()
+    fc = nn.DataParallel(fc).cuda()
 
     if args.resume:
         # Load checkpoint.
@@ -501,9 +379,7 @@ def main():
         model.load_state_dict(checkpoint['state_dict'])
         fc.load_state_dict(checkpoint['fc'])
         optimizer.load_state_dict(checkpoint['optimizer'])
-        CoVariance = checkpoint['CoVariance']
-        Ave = checkpoint['Ave']
-        Amount = checkpoint['Amount']
+        isda_criterion = checkpoint['isda_criterion']
         val_acc = checkpoint['val_acc']
         best_prec1 = checkpoint['best_acc']
         np.savetxt(accuracy_file, np.array(val_acc))
@@ -530,9 +406,7 @@ def main():
             'fc': fc.state_dict(),
             'best_acc': best_prec1,
             'optimizer': optimizer.state_dict(),
-            'CoVariance': CoVariance,
-            'Ave': Ave,
-            'Amount': Amount,
+            'isda_criterion': isda_criterion,
             'val_acc': val_acc,
 
         }, is_best, checkpoint=check_point)
@@ -552,6 +426,7 @@ def train(train_loader, model, fc, criterion, optimizer, epoch):
 
     train_batches_num = len(train_loader)
 
+    ratio = args.combine_ratio * (epoch / (training_configurations[args.model]['epochs']))
     # switch to train mode
     model.train()
     fc.train()
@@ -565,9 +440,7 @@ def train(train_loader, model, fc, criterion, optimizer, epoch):
 
         # compute output
 
-        features = model(input_var)
-        output = fc(features)
-        loss = criterion(features, fc, target_var, epoch, i, output)
+        loss, output = criterion(model, fc, input_var, target_var, ratio)
 
         # measure accuracy and record loss
         prec1 = accuracy(output.data, target, topk=(1,))[0]
@@ -661,6 +534,28 @@ def validate(val_loader, model, fc, criterion, epoch):
     val_acc.append(top1.ave)
 
     return top1.ave
+
+class Full_layer(torch.nn.Module):
+    '''explicitly define the full connected layer'''
+
+    def __init__(self, feature_num, class_num):
+        super(Full_layer, self).__init__()
+        self.class_num = class_num
+        self.fc = nn.Linear(feature_num, class_num)
+
+    def forward(self, x):
+        x = self.fc(x)
+        return x
+
+def mkdir_p(path):
+    '''make dir if not exist'''
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
 
 
 def save_checkpoint(state, is_best, checkpoint='checkpoint', filename='checkpoint.pth.tar'):
