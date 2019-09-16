@@ -1,12 +1,8 @@
 # Implicit Semantic Data Augmentation for Deep Networks **(Accepted by NeurIPS 2019)**
 
-Code for the NeurIPS 2019 paper 'Implicit Semantic Data Augmentation for Deep Networks' ()
+Code for the paper 'Implicit Semantic Data Augmentation for Deep Networks' ()
 
-In this paper, we propose a novel implicit semantic data augmentation (ISDA) approach to complement traditional augmentation techniques like ﬂipping, translation or rotation.
-- ISDA performs semantic data augmentation through translating deep features along semantic directions in the deep feature space.
-- Our method is highly efficient as an upper bound of the expected cross-entropy (CE) loss on the augmented training set is derived and minimized.
-- ISDA consistently improves the generalization performance of popular deep networks, especially with powerful traditional augmentation techniques (like Cutout and AutuAugment).
-
+In this paper, we propose a novel implicit semantic data augmentation (ISDA) approach to complement traditional augmentation techniques like ﬂipping, translation or rotation. ISDA consistently improves the generalization performance of popular deep networks, especially with powerful traditional augmentation techniques (like Cutout and AutuAugment).
 
 <p align="center">
     <img src="ISDA-overview.png" height="334" width= "800">
