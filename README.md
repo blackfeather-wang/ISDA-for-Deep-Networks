@@ -2,7 +2,7 @@
 
 Code for the paper 'Implicit Semantic Data Augmentation for Deep Networks' ()
 
-In this paper, we propose a novel implicit semantic data augmentation (ISDA) approach to complement traditional augmentation techniques like ﬂipping, translation or rotation. ISDA consistently improves the generalization performance of popular deep networks, especially with powerful traditional augmentation techniques (like Cutout and AutuAugment).
+In this paper, we propose a novel implicit semantic data augmentation (ISDA) approach to complement traditional augmentation techniques like ﬂipping, translation or rotation. ISDA consistently improves the generalization performance of popular deep networks, especially with powerful non-semantic augmentation techniques (like Cutout and AutuAugment).
 
 <p align="center">
     <img src="ISDA-overview.png" height="334" width= "800">
