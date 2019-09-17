@@ -1,4 +1,4 @@
-# Implicit Semantic Data Augmentation for Deep Networks **(Accepted by NeurIPS 2019)**
+# Implicit Semantic Data Augmentation for Deep Networks **(NeurIPS 2019)**
 
 Code for the paper 'Implicit Semantic Data Augmentation for Deep Networks' ()
 
