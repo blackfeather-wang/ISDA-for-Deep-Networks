@@ -241,14 +241,14 @@ def main():
 
     if args.augment:
         if args.autoaugment:
-            print('AutoAugment')
+            print('AutoAugment!')
             transform_train = transforms.Compose([
                 transforms.ToTensor(),
                 transforms.Lambda(lambda x: F.pad(x.unsqueeze(0),
                                                   (4, 4, 4, 4), mode='reflect').squeeze()),
                 transforms.ToPILImage(),
-                transforms.RandomHorizontalFlip(), CIFAR10Policy(),
-                transforms.RandomCrop(32),
+                transforms.RandomCrop(32), CIFAR10Policy(),
+                transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 Cutout(n_holes=args.n_holes, length=args.length),
                 normalize,
