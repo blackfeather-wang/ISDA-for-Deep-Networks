@@ -147,10 +147,10 @@ training_configurations = {
         'weight_decay': 5e-4,
     },
     'densenet_bc': {
-        'epochs': 350,
+        'epochs': 300,
         'batch_size': 64,
         'initial_learning_rate': 0.1,
-        'changing_lr': [150, 225, 300],
+        'changing_lr': [150, 200, 250],
         'lr_decay_rate': 0.1,
         'momentum': 0.9,
         'nesterov': True,
@@ -176,11 +176,7 @@ training_configurations = {
         'nesterov': True,
         'weight_decay': 5e-4,
     },
-}
-
-
-if args.dataset == 'cifar10':
-    training_configurations['shake_shake'] = {
+    'shake_shake': {
         'epochs': 1800,
         'batch_size': 64,
         'initial_learning_rate': 0.1,
@@ -189,18 +185,20 @@ if args.dataset == 'cifar10':
         'momentum': 0.9,
         'nesterov': True,
         'weight_decay': 1e-4,
-    }
-elif args.dataset == 'cifar100':
-    training_configurations['shake_shake'] = {
+    },
+    'shake_shake_x': {
         'epochs': 1800,
-        'batch_size': 128,
-        'initial_learning_rate': 0.2,
+        'batch_size': 64,
+        'initial_learning_rate': 0.1,
         'changing_lr': [],
         'lr_decay_rate': 0.1,
         'momentum': 0.9,
         'nesterov': True,
         'weight_decay': 1e-4,
-    }
+    },
+}
+
+
 
 record_path = './ISDA test/' + str(args.dataset) \
               + '_' + str(args.model) \
@@ -241,14 +239,14 @@ def main():
 
     if args.augment:
         if args.autoaugment:
-            print('AutoAugment!')
+            print('Autoaugment')
             transform_train = transforms.Compose([
                 transforms.ToTensor(),
                 transforms.Lambda(lambda x: F.pad(x.unsqueeze(0),
                                                   (4, 4, 4, 4), mode='reflect').squeeze()),
                 transforms.ToPILImage(),
-                transforms.RandomCrop(32), CIFAR10Policy(),
-                transforms.RandomHorizontalFlip(),
+                transforms.RandomCrop(32),
+                transforms.RandomHorizontalFlip(), CIFAR10Policy(),
                 transforms.ToTensor(),
                 Cutout(n_holes=args.n_holes, length=args.length),
                 normalize,
@@ -339,6 +337,10 @@ def main():
         if args.widen_factor == 96:
             model = networks.shake_shake.shake_resnet26_2x32d(class_num)
 
+    elif args.model == 'shake_shake_x':
+
+        model = networks.shake_shake.shake_resnext29_2x4x64d(class_num)
+
     if not os.path.isdir(check_point):
         mkdir_p(check_point)
 
@@ -414,7 +416,8 @@ def main():
         np.savetxt(accuracy_file, np.array(val_acc))
 
     print('Best accuracy: ', best_prec1)
-    val_acc.append(sum(val_acc[len(val_acc) - 10:]) / 10)
+    print('Average accuracy', sum(val_acc[len(val_acc) - 10:]) / 10)
+    # val_acc.append(sum(val_acc[len(val_acc) - 10:]) / 10)
     # np.savetxt(val_acc, np.array(val_acc))
     np.savetxt(accuracy_file, np.array(val_acc))
 
@@ -433,13 +436,12 @@ def train(train_loader, model, fc, criterion, optimizer, epoch):
 
     end = time.time()
     for i, (x, target) in enumerate(train_loader):
-        target = target.cuda(async=True)
+        target = target.cuda()
         x = x.cuda()
         input_var = torch.autograd.Variable(x)
         target_var = torch.autograd.Variable(target)
 
         # compute output
-
         loss, output = criterion(model, fc, input_var, target_var, ratio)
 
         # measure accuracy and record loss
@@ -487,7 +489,7 @@ def validate(val_loader, model, fc, criterion, epoch):
 
     end = time.time()
     for i, (input, target) in enumerate(val_loader):
-        target = target.cuda(async=True)
+        target = target.cuda()
         input = input.cuda()
         input_var = torch.autograd.Variable(input)
         target_var = torch.autograd.Variable(target)
@@ -584,7 +586,7 @@ class AverageMeter(object):
 
 
 def adjust_learning_rate(optimizer, epoch):
-    """Sets the learning rate to the initial LR divided by 5 at 60th, 120th and 160th epochs"""
+    """Sets the learning rate"""
     if not args.cos_lr:
         if epoch in training_configurations[args.model]['changing_lr']:
             for param_group in optimizer.param_groups:

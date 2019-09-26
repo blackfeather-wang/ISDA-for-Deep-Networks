@@ -33,6 +33,15 @@ CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar100 --model wideresnet --l
 
 ```
 
+Train Wide-ResNet-28-10 on CIFAR-10 / 100 with ISDA and AutoAugment
+
+```
+CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar10 --model wideresnet --layers 28 --widen-factor 10 --combine-ratio 0.5 --droprate 0.3 --cos_lr --autoaugment
+CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar100 --model wideresnet --layers 28 --widen-factor 10 --combine-ratio 0.5 --droprate 0.3 --cos_lr --autoaugment
+
+```
+
+
 Train Shake-Shake(26, 2x112d) on CIFAR-10 / 100 with ISDA and AutoAugment
 
 ```
@@ -77,8 +86,8 @@ fc = Full_layer(model.feature_num, class_num)
 The model needs to output deep features instead of inference results:
 
 ```python
-optimizer = torch.optim.SGD([{'params_model': model.parameters()},
-                             {'params_fc': fc.parameters()}],
+optimizer = torch.optim.SGD([{'params': model.parameters()},
+                             {'params': fc.parameters()}],
                              ......)
 ......
 from ISDA import ISDALoss
