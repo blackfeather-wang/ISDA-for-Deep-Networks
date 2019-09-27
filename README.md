@@ -113,7 +113,7 @@ loss, output = criterion(model, fc, input_var, target_var, ratio)
 
 --layers : total number of layers
 
---combine-ratio : hyper-parameter \lambda for ISDA (we recommend 0.5 for naive implementation.)
+--combine-ratio : hyper-parameter \lambda for ISDA (we recommend 0.5 or 0.25 for naive implementation.)
 
 --droprate : specify the dropout rate
 
