@@ -1,6 +1,6 @@
 # Implicit Semantic Data Augmentation for Deep Networks **(NeurIPS 2019)**
 
-Code for the paper 'Implicit Semantic Data Augmentation for Deep Networks' ()
+Code for the paper 'Implicit Semantic Data Augmentation for Deep Networks' (https://arxiv.org/abs/1909.12220)
 
 In this paper, we propose a novel implicit semantic data augmentation (ISDA) approach to complement traditional augmentation techniques like ﬂipping, translation or rotation. ISDA consistently improves the generalization performance of popular deep networks, especially with powerful non-semantic augmentation techniques (like Cutout and AutuAugment).
 
@@ -12,7 +12,12 @@ In this paper, we propose a novel implicit semantic data augmentation (ISDA) app
 If you find this work useful or use our codes in your own research, please use the following bibtex:
 
 ```
-
+@article{wang2019implicit,
+  title={Implicit Semantic Data Augmentation for Deep Networks},
+  author={Wang, Yulin and Pan, Xuran and Song, Shiji and Zhang, Hong and Wu, Cheng and Huang, Gao},
+  journal={arXiv preprint arXiv:1909.12220},
+  year={2019}
+}
 
 ```
 
