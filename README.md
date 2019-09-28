@@ -12,11 +12,21 @@ In this paper, we propose a novel implicit semantic data augmentation (ISDA) app
 If you find this work useful or use our codes in your own research, please use the following bibtex:
 
 ```
-@article{wang2019implicit,
-  title={Implicit Semantic Data Augmentation for Deep Networks},
-  author={Wang, Yulin and Pan, Xuran and Song, Shiji and Zhang, Hong and Wu, Cheng and Huang, Gao},
-  journal={arXiv preprint arXiv:1909.12220},
-  year={2019}
+@ARTICLE{2019arXiv190912220W,
+       author = {{Wang}, Yulin and {Pan}, Xuran and {Song}, Shiji and {Zhang}, Hong and
+         {Wu}, Cheng and {Huang}, Gao},
+        title = "{Implicit Semantic Data Augmentation for Deep Networks}",
+      journal = {arXiv e-prints},
+     keywords = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Artificial Intelligence, Computer Science - Machine Learning},
+         year = "2019",
+        month = "Sep",
+          eid = {arXiv:1909.12220},
+        pages = {arXiv:1909.12220},
+archivePrefix = {arXiv},
+       eprint = {1909.12220},
+ primaryClass = {cs.CV},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2019arXiv190912220W},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
 
 ```
