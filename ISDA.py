@@ -99,13 +99,7 @@ class ISDALoss(nn.Module):
         # sigma2 = ratio * \
         #          torch.bmm(torch.bmm(NxW_ij - NxW_kj,
         #                              CV_temp).view(N * C, 1, A),
-        #                    (NxW_ij - NxW_kj).view(N * C, A, 1)).view(N, C)
-
-        sigma2 = ratio * \
-                 torch.bmm(torch.bmm(NxW_ij - NxW_kj,
-                                     CV_temp),
-                           (NxW_ij - NxW_kj).permute(0, 2, 1))
-
+        #                    (NxW_ij - NxW_kj).view(N * C, A, 1)).view(N
         sigma2 = sigma2.mul(torch.eye(C).cuda()
                             .expand(N, C, C)).sum(2).view(N, C)
 
