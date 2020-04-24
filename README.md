@@ -2,7 +2,7 @@
 
 Code for the paper 'Implicit Semantic Data Augmentation for Deep Networks' (https://arxiv.org/abs/1909.12220)
 
-**Update on 2020/04/24** Release Code for Image Classification on ImageNet and Semantic Segmentation on Cityscapes.
+**Update on 2020/04/24: Release Code for Image Classification on ImageNet and Semantic Segmentation on Cityscapes.**
 
 ## Introduction
 
