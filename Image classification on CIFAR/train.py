@@ -58,7 +58,7 @@ parser.add_argument('--name', default='', type=str,
 parser.add_argument('--no', default='1', type=str,
                     help='index of the experiment (for recording convenience)')
 
-parser.add_argument('--combine-ratio', default=0.5, type=float,
+parser.add_argument('--lambda_0', default=0.5, type=float,
                     help='hyper-patameter_\lambda for ISDA')
 
 # Wide-ResNet & Shake Shake
@@ -210,7 +210,7 @@ record_path = './ISDA test/' + str(args.dataset) \
               + (('-' + str(args.cardinality)) if 'resnext' in args.model else '') \
               + '_' + str(args.name) \
               + '/' + 'no_' + str(args.no) \
-              + '_combine-ratio_' + str(args.combine_ratio) \
+              + '_lambda_0_' + str(args.lambda_0) \
               + ('_standard-Aug_' if args.augment else '') \
               + ('_dropout_' if args.droprate > 0 else '') \
               + ('_autoaugment_' if args.autoaugment else '') \
@@ -429,7 +429,7 @@ def train(train_loader, model, fc, criterion, optimizer, epoch):
 
     train_batches_num = len(train_loader)
 
-    ratio = args.combine_ratio * (epoch / (training_configurations[args.model]['epochs']))
+    ratio = args.lambda_0 * (epoch / (training_configurations[args.model]['epochs']))
     # switch to train mode
     model.train()
     fc.train()
