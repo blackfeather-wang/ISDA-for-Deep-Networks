@@ -35,10 +35,10 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python imagenet_DDP.py PATH_TO_DATASET --mo
 
 |Model|Params|Baseline|ISDA|Pre-trainedz model|
 |-----|------|-----|-----|-----|
-|ResNet-50  |25.6M |23.0|21.9|--|
-|ResNet-101 |44.6M |21.7|20.8|--|
-|ResNet-152 |60.3M |21.3|20.3|--|
-|DenseNet-BC-121 |8.0M |23.7|23.2|--|
-|DenseNet-BC-265 |33.3M |21.9|21.2|--|
-|ResNeXt50, 32X4d |25.0M|22.5|21.3|--|
-|ResNeXt101, 32x8d|88.8M|21.1|20.1|--|
+|ResNet-50  |25.6M |23.0|**21.9**|--|
+|ResNet-101 |44.6M |21.7|**20.8**|--|
+|ResNet-152 |60.3M |21.3|**20.3**|--|
+|DenseNet-BC-121 |8.0M |23.7|**23.2**|--|
+|DenseNet-BC-265 |33.3M |21.9|**21.2**|--|
+|ResNeXt50, 32X4d |25.0M|22.5|**21.3**|--|
+|ResNeXt101, 32x8d|88.8M|21.1|**20.1**|--|
