@@ -6,7 +6,7 @@ In this paper, we propose a novel implicit semantic data augmentation (ISDA) app
 ISDA consistently improves the generalization performance of popular deep networks on supervised & semi-supervised image classification, semantic segmentation, object detection and instance segmentation.
 
 <p align="center">
-    <img src="ISDA-overview.png" height="274" width= "800">
+    <img src="ISDA-overview.png" height="308" width= "900">
 </p>
 
 
