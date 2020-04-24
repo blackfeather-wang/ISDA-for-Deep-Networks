@@ -35,5 +35,5 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python imagenet_DDP.py PATH_TO_DATASET --mo
 |ResNet-152 |60.3M |21.3|**20.3**|[Tsinghua Cloud](https://cloud.tsinghua.edu.cn/f/7707e8709b70446fb65e/?dl=1)|
 |DenseNet-BC-121 |8.0M |23.7|**23.2**|[Tsinghua Cloud](https://cloud.tsinghua.edu.cn/f/e5baa6f0ac2a42ba8421/?dl=1)|
 |DenseNet-BC-265 |33.3M |21.9|**21.2**|[Tsinghua Cloud](https://cloud.tsinghua.edu.cn/f/ba91c2d5ce7b4650a143/?dl=1)|
-|ResNeXt50, 32X4d |25.0M|22.5|**21.3**|[Tsinghua Cloud](https://cloud.tsinghua.edu.cn/f/3ae2de3bdd13495ab181/?dl=1)|
+|ResNeXt50, 32x4d |25.0M|22.5|**21.3**|[Tsinghua Cloud](https://cloud.tsinghua.edu.cn/f/3ae2de3bdd13495ab181/?dl=1)|
 |ResNeXt101, 32x8d|88.8M|21.1|**20.1**|[Tsinghua Cloud](https://cloud.tsinghua.edu.cn/f/7dcca2bd9cfa426bb52d/?dl=1)|
