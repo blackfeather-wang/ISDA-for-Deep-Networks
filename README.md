@@ -66,6 +66,6 @@ If you find this work useful or use our codes in your own research, please use t
 Our code for semantic segmentation is mainly based on
 [pytorch-segmentation-toolbox](https://github.com/speedinghzl/pytorch-segmentation-toolbox).
 
-## To Do
+## To do
 Update code for semi-supervised learning.
 
