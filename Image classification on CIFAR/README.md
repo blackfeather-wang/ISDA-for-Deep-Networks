@@ -1,36 +1,4 @@
-# Implicit Semantic Data Augmentation for Deep Networks **(NeurIPS 2019)**
-
-Code for the paper 'Implicit Semantic Data Augmentation for Deep Networks' (https://arxiv.org/abs/1909.12220)
-
-In this paper, we propose a novel implicit semantic data augmentation (ISDA) approach to complement traditional augmentation techniques like ﬂipping, translation or rotation. ISDA consistently improves the generalization performance of popular deep networks, especially with powerful non-semantic augmentation techniques (like Cutout and AutuAugment).
-
-<p align="center">
-    <img src="ISDA-overview.png" height="334" width= "800">
-</p>
-
-
-If you find this work useful or use our codes in your own research, please use the following bibtex:
-
-```
-@ARTICLE{2019arXiv190912220W,
-       author = {{Wang}, Yulin and {Pan}, Xuran and {Song}, Shiji and {Zhang}, Hong and
-         {Wu}, Cheng and {Huang}, Gao},
-        title = "{Implicit Semantic Data Augmentation for Deep Networks}",
-      journal = {arXiv e-prints},
-     keywords = {Computer Science - Computer Vision and Pattern Recognition, Computer Science - Artificial Intelligence, Computer Science - Machine Learning},
-         year = "2019",
-        month = "Sep",
-          eid = {arXiv:1909.12220},
-        pages = {arXiv:1909.12220},
-archivePrefix = {arXiv},
-       eprint = {1909.12220},
- primaryClass = {cs.CV},
-       adsurl = {https://ui.adsabs.harvard.edu/abs/2019arXiv190912220W},
-      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
-}
-
-```
-
+# Image classification on CIFAR
 
 ## Requirements
 - python 3.5.4
@@ -43,16 +11,16 @@ archivePrefix = {arXiv},
 Train Wide-ResNet-28-10 on CIFAR-10 / 100 with ISDA
 
 ```
-CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar10 --model wideresnet --layers 28 --widen-factor 10 --combine-ratio 0.5 --droprate 0.3
-CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar100 --model wideresnet --layers 28 --widen-factor 10 --combine-ratio 0.5 --droprate 0.3
+CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar10 --model wideresnet --layers 28 --widen-factor 10 --lambda_0 0.5 --droprate 0.3
+CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar100 --model wideresnet --layers 28 --widen-factor 10 --lambda_0 0.5 --droprate 0.3
 
 ```
 
 Train Wide-ResNet-28-10 on CIFAR-10 / 100 with ISDA and AutoAugment
 
 ```
-CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar10 --model wideresnet --layers 28 --widen-factor 10 --combine-ratio 0.5 --droprate 0.3 --cos_lr --autoaugment
-CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar100 --model wideresnet --layers 28 --widen-factor 10 --combine-ratio 0.5 --droprate 0.3 --cos_lr --autoaugment
+CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar10 --model wideresnet --layers 28 --widen-factor 10 --lambda_0 0.5 --droprate 0.3 --cos_lr --autoaugment
+CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar100 --model wideresnet --layers 28 --widen-factor 10 --lambda_0 0.5 --droprate 0.3 --cos_lr --autoaugment
 
 ```
 
@@ -60,8 +28,8 @@ CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar100 --model wideresnet --l
 Train Shake-Shake(26, 2x112d) on CIFAR-10 / 100 with ISDA and AutoAugment
 
 ```
-CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar10 --model shake_shake --widen-factor 112 --combine-ratio 0.5 --cos_lr --autoaugment
-CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar100 --model shake_shake --widen-factor 112 --combine-ratio 0.5 --cos_lr --autoaugment
+CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar10 --model shake_shake --widen-factor 112 --lambda_0 0.5 --cos_lr --autoaugment
+CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar100 --model shake_shake --widen-factor 112 --lambda_0 0.5 --cos_lr --autoaugment
 
 ```
 
@@ -123,7 +91,7 @@ loss, output = criterion(model, fc, input_var, target_var, ratio)
 
 --layers : total number of layers
 
---combine-ratio : hyper-parameter \lambda for ISDA (we recommend 0.5 or 0.25 for naive implementation.)
+--lambda_0 : hyper-parameter \lambda_0 for ISDA (we recommend 0.5 or 0.25 for naive implementation.)
 
 --droprate : specify the dropout rate
 
