@@ -6,7 +6,7 @@ Code for the paper 'Implicit Semantic Data Augmentation for Deep Networks' (http
 
 ## Introduction
 
-In this paper, we propose a novel implicit semantic data augmentation (ISDA) approach to complement traditional augmentation techniques like ﬂipping, translation or rotation.
+In this paper, we propose a novel implicit semantic data augmentation (ISDA) approach to complement traditional augmentation techniques like flipping, translation or rotation.
 ISDA consistently improves the generalization performance of popular deep networks on supervised & semi-supervised image classification, semantic segmentation, object detection and instance segmentation.
 
 <p align="center">
@@ -26,7 +26,6 @@ If you find this work useful or use our codes in your own research, please use t
         pages = {12635--12644},
          year = {2019},
 }
-
 ```
 
 ## Results
@@ -61,5 +60,7 @@ If you find this work useful or use our codes in your own research, please use t
     <img src="Instance Segmentation.png" height="174" width= "900">
 </p>
 
-
+## Acknowledgment
+Our code for semantic segmentation is mainly based on
+[pytorch-segmentation-toolbox](https://github.com/speedinghzl/pytorch-segmentation-toolbox)
 
