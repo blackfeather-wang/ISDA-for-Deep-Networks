@@ -2,6 +2,9 @@
 
 Code for the paper 'Implicit Semantic Data Augmentation for Deep Networks' (https://arxiv.org/abs/1909.12220)
 
+
+## Introduction
+
 In this paper, we propose a novel implicit semantic data augmentation (ISDA) approach to complement traditional augmentation techniques like ﬂipping, translation or rotation.
 ISDA consistently improves the generalization performance of popular deep networks on supervised & semi-supervised image classification, semantic segmentation, object detection and instance segmentation.
 
@@ -9,6 +12,8 @@ ISDA consistently improves the generalization performance of popular deep networ
     <img src="ISDA-overview.png" height="309" width= "900">
 </p>
 
+
+## Citation
 
 If you find this work useful or use our codes in your own research, please use the following bibtex:
 
