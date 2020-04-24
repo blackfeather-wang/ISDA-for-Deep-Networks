@@ -45,4 +45,15 @@ If you find this work useful or use our codes in your own research, please use t
     <img src="Semantic Segmentation.png" height="250" width= "900">
 </p>
 
+- Object detection on MS COCO
+<p align="center">
+    <img src="Object detection.png" height="365" width= "900">
+</p>
+
+- Instance segmentation on MS COCO
+<p align="center">
+    <img src="Instance Segmentation.png" height="174" width= "900">
+</p>
+
+
 
