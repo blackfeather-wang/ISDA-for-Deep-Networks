@@ -76,7 +76,7 @@ optimizer = torch.optim.SGD([{'params': model.parameters()},
 from ISDA import ISDALoss
 isda_criterion = ISDALoss(model.feature_num, class_num).cuda()
 ......
-ratio = args.combine_ratio * (epoch / (training_configurations[args.model]['epochs']))
+ratio = args.lambda_0 * (epoch / (training_configurations[args.model]['epochs']))
 loss, output = criterion(model, fc, input_var, target_var, ratio)
 ```
 
