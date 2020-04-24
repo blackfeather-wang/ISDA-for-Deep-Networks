@@ -64,5 +64,5 @@ If you find this work useful or use our codes in your own research, please use t
 
 ## Acknowledgment
 Our code for semantic segmentation is mainly based on
-[pytorch-segmentation-toolbox](https://github.com/speedinghzl/pytorch-segmentation-toolbox)
+[pytorch-segmentation-toolbox](https://github.com/speedinghzl/pytorch-segmentation-toolbox).
 
