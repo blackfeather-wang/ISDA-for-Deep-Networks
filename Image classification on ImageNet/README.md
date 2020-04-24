@@ -30,7 +30,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python imagenet_DDP.py PATH_TO_DATASET --mo
 
 **Pre-trained models will be updated soon.**
 
-|Model|Params|Baseline|ISDA|Pre-trainedz model|
+|Model|Params|Baseline|ISDA|Pre-trained model|
 |-----|------|-----|-----|-----|
 |ResNet-50  |25.6M |23.0|**21.9**|--|
 |ResNet-101 |44.6M |21.7|**20.8**|--|
