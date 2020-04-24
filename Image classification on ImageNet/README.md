@@ -26,9 +26,9 @@ Evaluate pre-trained model on ImageNet
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python imagenet_DDP.py PATH_TO_DATASET --model MODEL_NAME --resume PATH_TO_MODEL -e --batch-size 512 --lr 0.2 --epochs 300 --lambda_0 0 --workers 32 --dist-url 'tcp://127.0.0.1:12345' --dist-backend 'nccl' --multiprocessing-distributed --world-size 1 --rank 0
 ```
 
-## Results & Pre-trained model
+## Results & Pre-trained models
 
-|Model|Params|Baseline|ISDA|Pre-trained model|
+|Model|Params|Baseline|ISDA|Model|
 |-----|------|-----|-----|-----|
 |ResNet-50  |25.6M |23.0|**21.9**|[Tsinghua Cloud](https://cloud.tsinghua.edu.cn/f/2ccd502cbf774b40a226/?dl=1)|
 |ResNet-101 |44.6M |21.7|**20.8**|[Tsinghua Cloud](https://cloud.tsinghua.edu.cn/f/4ac40c241b8941619109/?dl=1)|
