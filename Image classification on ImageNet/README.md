@@ -28,6 +28,8 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 python imagenet_DDP.py PATH_TO_DATASET --mo
 
 ## Results & Pre-trained models
 
+- Measured by Top-1 error.
+
 |Model|Params|Baseline|ISDA|Model|
 |-----|------|-----|-----|-----|
 |ResNet-50  |25.6M |23.0|**21.9**|[Tsinghua Cloud](https://cloud.tsinghua.edu.cn/f/2ccd502cbf774b40a226/?dl=1)|
