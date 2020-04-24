@@ -27,12 +27,22 @@ If you find this work useful or use our codes in your own research, please use t
 
 - Supervised image classification on ImageNet
 <p align="center">
-    <img src="ImageNet.png" height="253" width= "800">
+    <img src="ImageNet.png" height="316" width= "1000">
 </p>
 
-- Semi-supervised image classification
+- Complementing traditional data augmentation techniques
 <p align="center">
-    <img src="Semantic Segmentation.png" height="222" width= "800">
+    <img src="Complementary results.png" height="235" width= "1000">
+</p>
+
+- Semi-supervised image classification on CIFAR & SVHN
+<p align="center">
+    <img src="Semi supervised learning.png" height="309" width= "1000">
+</p>
+
+- Semantic segmentation on Cityscapes
+<p align="center">
+    <img src="Semantic Segmentation.png" height="278" width= "1000">
 </p>
 
 
