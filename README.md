@@ -1,6 +1,8 @@
 # Implicit Semantic Data Augmentation for Deep Networks **(NeurIPS 2019)**
 
-Code for the paper 'Implicit Semantic Data Augmentation for Deep Networks' (https://arxiv.org/abs/1909.12220)
+Code for the paper [Implicit Semantic Data Augmentation for Deep Networks](https://arxiv.org/abs/1909.12220)
+
+Please go to 
 
 **Update on 2020/04/24: Release Code for Image Classification on ImageNet and Semantic Segmentation on Cityscapes.**
 
