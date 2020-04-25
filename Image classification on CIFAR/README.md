@@ -1,4 +1,4 @@
-# Image classification on CIFAR
+# Image Classification on CIFAR
 
 ## Requirements
 - python 3.5.4
@@ -45,7 +45,7 @@ CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar100 --model shake_shake --
 
 
 
-## Usage for other models
+## Usage for Other Models
 
 To apply ISDA to other models, the final fully connected layer needs to be explicitly defined:
 
@@ -83,7 +83,7 @@ loss, output = criterion(model, fc, input_var, target_var, ratio)
 
 
 
-## Argument description
+## Argument Description
 
 --dataset : cifar10 or cifar100
 
