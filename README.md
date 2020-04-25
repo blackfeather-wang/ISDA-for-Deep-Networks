@@ -30,11 +30,11 @@ If you find this work useful or use our codes in your own research, please use t
 }
 ```
 
-## Get started
+## Get Started
 
-Please go to the folder [Image classification on CIFAR](https://github.com/blackfeather-wang/ISDA-for-Deep-Networks/tree/master/Image%20classification%20on%20CIFAR), [Image classification on ImageNet](https://github.com/blackfeather-wang/ISDA-for-Deep-Networks/tree/master/Image%20classification%20on%20ImageNet) and [Semantic segmentation on Cityscapes](https://github.com/blackfeather-wang/ISDA-for-Deep-Networks/tree/master/Semantic%20segmentation%20on%20Cityscapes) for specific docs.
+Please go to the folder [Image Classification on CIFAR](https://github.com/blackfeather-wang/ISDA-for-Deep-Networks/tree/master/Image%20classification%20on%20CIFAR), [Image classification on ImageNet](https://github.com/blackfeather-wang/ISDA-for-Deep-Networks/tree/master/Image%20classification%20on%20ImageNet) and [Semantic segmentation on Cityscapes](https://github.com/blackfeather-wang/ISDA-for-Deep-Networks/tree/master/Semantic%20segmentation%20on%20Cityscapes) for specific docs.
 
-## Pre-trained models on ImageNet
+## Pre-trained Models on ImageNet
 
 - Measured by Top-1 error.
 
@@ -85,6 +85,6 @@ Please go to the folder [Image classification on CIFAR](https://github.com/black
 Our code for semantic segmentation is mainly based on
 [pytorch-segmentation-toolbox](https://github.com/speedinghzl/pytorch-segmentation-toolbox).
 
-## To do
+## To Do
 Update code for semi-supervised learning.
 
