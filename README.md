@@ -1,6 +1,6 @@
 # Implicit Semantic Data Augmentation for Deep Networks **(NeurIPS 2019)**
 
-Code for the paper [Implicit Semantic Data Augmentation for Deep Networks](https://arxiv.org/abs/1909.12220)
+Code for the paper [Implicit Semantic Data Augmentation for Deep Networks](https://arxiv.org/abs/1909.12220).
 
 **Update on 2020/04/25: Release Pre-trained Models on ImageNet.**
 
@@ -18,7 +18,7 @@ ISDA consistently improves the generalization performance of popular deep networ
 
 ## Citation
 
-If you find this work useful or use our codes in your own research, please use the following bibtex:
+If you find this work useful or use our code in your own research, please use the following bibtex:
 
 ```
 @inproceedings{NIPS2019_9426,
