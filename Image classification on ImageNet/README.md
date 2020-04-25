@@ -1,4 +1,4 @@
-# Image classification on ImageNet
+# Image Classification on ImageNet
 
 ## Requirements
 - python 3.7
