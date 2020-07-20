@@ -53,32 +53,32 @@ Please go to the folder [Image classification on CIFAR](https://github.com/black
 
 - Supervised image classification on ImageNet
 <p align="center">
-    <img src="ImageNet.png" height="284" width= "900">
+    <img src="ImageNet.png" width= "900">
 </p>
 
 - Complementing traditional data augmentation techniques
 <p align="center">
-    <img src="Complementary results.png" height="212" width= "900">
+    <img src="Complementary results.png" width= "900">
 </p>
 
 - Semi-supervised image classification on CIFAR & SVHN
 <p align="center">
-    <img src="Semi supervised learning.png" height="278" width= "900">
+    <img src="Semi supervised learning.png" width= "900">
 </p>
 
 - Semantic segmentation on Cityscapes
 <p align="center">
-    <img src="Semantic Segmentation.png" height="250" width= "900">
+    <img src="Semantic Segmentation.png" width= "900">
 </p>
 
 - Object detection on MS COCO
 <p align="center">
-    <img src="Object detection.png" height="365" width= "900">
+    <img src="Object detection.png" width= "900">
 </p>
 
 - Instance segmentation on MS COCO
 <p align="center">
-    <img src="Instance Segmentation.png" height="174" width= "900">
+    <img src="Instance Segmentation.png" width= "900">
 </p>
 
 ## Acknowledgment
