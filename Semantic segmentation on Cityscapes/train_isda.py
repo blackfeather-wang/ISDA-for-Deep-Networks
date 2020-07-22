@@ -158,11 +158,6 @@ def set_bn_momentum(m):
 class EstimatorCV():
     def __init__(self, feature_num, class_num, device):
         super(EstimatorCV, self).__init__()
-        #         self.class_num = class_num
-        #         self.device = device
-        #         self.CoVariance = torch.zeros(class_num, feature_num, feature_num).to(device)
-        #         self.Ave = torch.zeros(class_num, feature_num).to(device)
-        #         self.Amount = torch.zeros(class_num).to(device)
 
         self.class_num = class_num
         self.device = device
@@ -181,14 +176,8 @@ class EstimatorCV():
             N, C, A
         )
 
-        #         print((labels == 255).long().sum())
-
         label_mask = (labels == 255).long()
         labels = ((1 - label_mask).mul(labels) + label_mask * 19).long()
-
-        #         print((labels==19).long().sum())
-
-        #         exit()
 
         onehot = torch.zeros(N, C).cuda()
         onehot.scatter_(1, labels.view(-1, 1), 1)
@@ -254,19 +243,6 @@ class ISDALoss(nn.Module):
 
         CV_temp = cv_matrix[labels]
 
-        # sigma2 = ratio * \
-        #          torch.bmm(torch.bmm(NxW_ij - NxW_kj,
-        #                              CV_temp).view(N * C, 1, A),
-        #                    (NxW_ij - NxW_kj).view(N * C, A, 1)).view(N, C)
-
-        #         sigma2 = ratio * \
-        #                  torch.bmm(torch.bmm(NxW_ij - NxW_kj,
-        #                                      CV_temp),
-        #                            (NxW_ij - NxW_kj).permute(0, 2, 1))
-
-        #         sigma2 = sigma2.mul(torch.eye(C).cuda()
-        #                             .expand(N, C, C)).sum(2).view(N, C)
-
         sigma2 = ratio * (weight_m - NxW_kj).pow(2).mul(
             CV_temp.view(N, 1, A).expand(N, C, A)
         ).sum(2)
@@ -286,10 +262,6 @@ class ISDALoss(nn.Module):
 
         target_x = target_x.long().squeeze()
 
-        #         print(target_x[0,10:20,10:20])
-        #         print(target_x.size())
-        #         time.sleep(20000)
-
         C = self.class_num
 
         features_NHWxA = features.permute(0, 2, 3, 1).contiguous().view(N * H * W, A)
@@ -297,14 +269,6 @@ class ISDALoss(nn.Module):
         target_x_NHW = target_x.contiguous().view(N * H * W)
 
         y_NHWxC = y.permute(0, 2, 3, 1).contiguous().view(N * H * W, C)
-
-        # y = fc(features)
-
-        # self.estimator.update_CV(features.detach(), target_x)
-        #
-        # isda_aug_y = self.isda_aug(final_conv, features, y, target_x, self.estimator.CoVariance.detach(), ratio)
-
-        # loss = self.cross_entropy(isda_aug_y, target_x)
 
         self.estimator.update_CV(features_NHWxA.detach(), target_x_NHW)
 
@@ -343,21 +307,6 @@ def main():
             criterion = CriterionOhemDSN(thresh=args.ohem_thres, min_kept=args.ohem_keep)
         else:
             criterion = CriterionDSN()  # CriterionCrossEntropy()
-
-            # model = Res_Deeplab(args.num_classes, criterion=criterion,
-            #         pretrained_model=args.restore_from)
-        #         seg_model = eval('networks.' + args.model + '.Seg_Model')(
-        #             num_classes=args.num_classes, criterion=criterion,
-        #             pretrained_model=None
-        #         )
-
-        #         seg_model = load_model(seg_model, './dataset/resnet101-imagenet.pth', isda=False)
-
-        #         seg_model = load_model(seg_model, './res101_isda.pth', isda=True)
-
-        #         seg_model = load_model(seg_model, 'isda_BB_deeplabv3_snapshots_baseline/CS_scenes_10000.pth')
-
-        # seg_model.init_weights()
 
         seg_model = eval('networks.' + args.model + '.Seg_Model')(
             num_classes=args.num_classes, criterion=criterion,
@@ -410,16 +359,11 @@ def main():
 
                 [x, x_dsn], [feature_x, feature_x_dsn] = model(images, isda=True)
 
-                # ratio = 7.5 * 0.5 * (1 - math.cos(math.pi * global_iteration / args.num_steps))
-
                 ratio = args.lambda_0 * global_iteration / args.num_steps
                 x_isda = isda_augmentor_1(feature_x, model.module.final_conv_1, x, labels, ratio)
                 x_dsn_isda = isda_augmentor_2(feature_x_dsn, model.module.final_conv_2, x_dsn, labels, ratio)
 
-
                 loss = criterion([x_isda, x_dsn_isda], labels)
-
-                # loss = model(images, labels)
 
                 reduce_loss = engine.all_reduce_tensor(loss)
                 loss.backward()
