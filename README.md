@@ -1,6 +1,10 @@
-# Implicit Semantic Data Augmentation for Deep Networks **(NeurIPS 2019)**
+# ISDA-Pytorch
 
-Code for the paper [Implicit Semantic Data Augmentation for Deep Networks](https://arxiv.org/abs/1909.12220).
+The Implicit Semantic Data Augmentation (ISDA) algorithm implemented in Pytorch.
+
+- Implicit Semantic Data Augmentation for Deep Networks (NeurIPS 2019): [https://arxiv.org/abs/1909.12220](https://arxiv.org/abs/1909.12220)
+
+- Regularizing Deep Networks with Semantic Data Augmentation (journal version of ISDA): [https://arxiv.org/abs/2007.10538](https://arxiv.org/abs/2007.10538)
 
 **Update on 2020/04/25: Release Pre-trained Models on ImageNet.**
 
@@ -8,7 +12,7 @@ Code for the paper [Implicit Semantic Data Augmentation for Deep Networks](https
 
 ## Introduction
 
-In this paper, we propose a novel implicit semantic data augmentation (ISDA) approach to complement traditional augmentation techniques like flipping, translation or rotation.
+We propose a novel implicit semantic data augmentation (ISDA) approach to complement traditional augmentation techniques like flipping, translation or rotation.
 ISDA consistently improves the generalization performance of popular deep networks on supervised & semi-supervised image classification, semantic segmentation, object detection and instance segmentation.
 
 <p align="center">
