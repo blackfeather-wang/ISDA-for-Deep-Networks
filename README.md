@@ -22,7 +22,7 @@ ISDA consistently improves the generalization performance of popular deep networ
 
 ## Citation
 
-If you find this work useful or use our code in your own research, please use the following bibtex:
+If you find this work valuable or use our code in your own research, please consider citing us with the following bibtex:
 
 ```
 @inproceedings{NIPS2019_9426,
