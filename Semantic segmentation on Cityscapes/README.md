@@ -7,8 +7,8 @@ Please refer to their docs.
 
 ## Run
 
-Train Deeplab-V3 on Cityscapes
+Train Deeplab-V3 on Cityscapes using ISDA
 
 ```
-./run_local.sh YOUR_CS_PATH [deeplabv3|deeplabv3_isda] 40000 769,769 0
+./run_local.sh YOUR_CS_PATH deeplabv3_isda 40000 769,769 0
 ```
