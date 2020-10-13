@@ -28,7 +28,7 @@ If you find this work valuable or use our code in your own research, please cons
 @inproceedings{NIPS2019_9426,
         title = {Implicit Semantic Data Augmentation for Deep Networks},
        author = {Wang, Yulin and Pan, Xuran and Song, Shiji and Zhang, Hong and Huang, Gao and Wu, Cheng},
-    booktitle = {Advances in Neural Information Processing Systems 32},
+    booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
         pages = {12635--12644},
          year = {2019},
 }
