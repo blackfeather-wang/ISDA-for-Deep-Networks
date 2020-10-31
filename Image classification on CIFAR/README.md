@@ -19,8 +19,8 @@ CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar100 --model wideresnet --l
 Train Wide-ResNet-28-10 on CIFAR-10 / 100 with ISDA and AutoAugment
 
 ```
-CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar10 --model wideresnet --layers 28 --widen-factor 10 --lambda_0 0.5 --droprate 0.3 --cos_lr --autoaugment
-CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar100 --model wideresnet --layers 28 --widen-factor 10 --lambda_0 0.5 --droprate 0.3 --cos_lr --autoaugment
+CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar10 --model wideresnet --layers 28 --widen-factor 10 --lambda_0 0.5 --droprate 0.3 --autoaugment
+CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar100 --model wideresnet --layers 28 --widen-factor 10 --lambda_0 0.5 --droprate 0.3 --autoaugment
 
 ```
 
