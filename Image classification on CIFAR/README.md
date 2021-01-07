@@ -2,7 +2,7 @@
 
 ## Requirements
 - python 3.5.4
-- torch 1.0.1
+- pytorch 1.0.1
 - torchvision 0.2.2
 
 
