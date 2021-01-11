@@ -28,7 +28,7 @@ import networks.resnext
 import networks.shake_shake
 import numpy as np
 
-parser = argparse.ArgumentParser(description='PyTorch WideResNet Training')
+parser = argparse.ArgumentParser(description='Implicit Semantic Data Augmentation (ISDA)')
 parser.add_argument('--dataset', default='cifar10', type=str,
                     help='dataset (cifar10 [default] or cifar100)')
 
