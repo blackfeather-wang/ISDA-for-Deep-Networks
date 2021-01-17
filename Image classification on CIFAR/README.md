@@ -36,11 +36,11 @@ CUDA_VISIBLE_DEVICES=0 python train.py --dataset cifar100 --model shake_shake --
 ## Results
 
 <p align="center">
-    <img src="ISDA-cifar-1.png" height="414" width= "700">
+    <img src="ISDA-cifar-1.png" width= "900">
 </p>
 
 <p align="center">
-    <img src="ISDA-cifar-2.png" height="221" width= "700">
+    <img src="ISDA-cifar-2.png" width= "900">
 </p>
 
 

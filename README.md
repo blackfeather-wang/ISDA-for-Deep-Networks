@@ -2,9 +2,11 @@
 
 The Implicit Semantic Data Augmentation (ISDA) algorithm implemented in Pytorch.
 
-- Implicit Semantic Data Augmentation for Deep Networks (NeurIPS 2019): [https://arxiv.org/abs/1909.12220](https://arxiv.org/abs/1909.12220)
+- (NeurIPS 2019) [Implicit Semantic Data Augmentation for Deep Networks](https://arxiv.org/abs/1909.12220)
 
-- Regularizing Deep Networks with Semantic Data Augmentation (journal version of ISDA): [https://arxiv.org/abs/2007.10538](https://arxiv.org/abs/2007.10538)
+- (T-PAMI) [Regularizing Deep Networks with Semantic Data Augmentation](https://arxiv.org/abs/2007.10538)
+
+**Update on 2020/01/17: Journal Version of ISDA is Accepted by T-PAMI!**
 
 **Update on 2020/04/25: Release Pre-trained Models on ImageNet.**
 
@@ -32,6 +34,13 @@ If you find this work valuable or use our code in your own research, please cons
         pages = {12635--12644},
          year = {2019},
 }
+
+@article{wang2021regularizing,
+  title={Regularizing deep networks with semantic data augmentation},
+  author={Wang, Yulin and Huang, Gao and Song, Shiji and Pan, Xuran and Xia, Yitong and Wu, Cheng},
+  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  year={2021}
+}
 ```
 
 ## Get Started
@@ -51,6 +60,13 @@ Please go to the folder [Image classification on CIFAR](https://github.com/black
 |DenseNet-BC-265 |33.3M |21.9|**21.2**|[Tsinghua Cloud](https://cloud.tsinghua.edu.cn/f/ba91c2d5ce7b4650a143/?dl=1) / [Google Drive](https://drive.google.com/open?id=1RwFKPBs1KFnr3Ku0Q1Yuv24t-RvhDDiC)|
 |ResNeXt50, 32x4d |25.0M|22.5|**21.3**|[Tsinghua Cloud](https://cloud.tsinghua.edu.cn/f/3ae2de3bdd13495ab181/?dl=1) / [Google Drive](https://drive.google.com/open?id=1vOHtNlMmjbEw0w96Xi855WZO0dCofEaw)|
 |ResNeXt101, 32x8d|88.8M|21.1|**20.1**|[Tsinghua Cloud](https://cloud.tsinghua.edu.cn/f/7dcca2bd9cfa426bb52d/?dl=1) / [Google Drive](https://drive.google.com/open?id=1pOneh2C3inPpzite68EHJrsiw2TVfa74)|
+
+## Visualization of Augmented Samples
+
+- ImageNet
+<p align="center">
+    <img src="Visualization.png" width= "900">
+</p>
 
 
 ## Results
