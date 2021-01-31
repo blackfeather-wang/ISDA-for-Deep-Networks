@@ -39,7 +39,8 @@ If you find this work valuable or use our code in your own research, please cons
         title = {Regularizing deep networks with semantic data augmentation},
        author = {Wang, Yulin and Huang, Gao and Song, Shiji and Pan, Xuran and Xia, Yitong and Wu, Cheng},
       journal = {IEEE Transactions on Pattern Analysis and Machine Intelligence},
-         year = {2021}
+         year = {2021},
+          doi = {10.1109/TPAMI.2021.3052951}
 }
 ```
 
