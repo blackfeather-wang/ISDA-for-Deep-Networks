@@ -6,6 +6,8 @@ The Implicit Semantic Data Augmentation (ISDA) algorithm implemented in Pytorch.
 
 - (T-PAMI) [Regularizing Deep Networks with Semantic Data Augmentation](https://arxiv.org/abs/2007.10538)
 
+**Update on 2021/04/23: Release Code for Visualizing Deep Features on ImageNet!**
+
 **Update on 2021/01/17: Journal Version of ISDA is Accepted by T-PAMI!**
 
 **Update on 2020/04/25: Release Pre-trained Models on ImageNet.**
